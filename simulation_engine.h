@@ -14,6 +14,21 @@ namespace evtol
         FAULT_OCCURRED
     };
 
+    template <typename T>
+    struct Event
+    {
+        EventType type;
+        double time_hours;
+        T data;
+
+        Event(EventType t, double time, T d) : type(t), time_hours(time), data(std::move(d)) {}
+
+        bool operator<(const Event &other) const
+        {
+            return time_hours > other.time_hours;
+        }
+    };
+
     struct FlightCompleteData
     {
         int aircraft_id;
@@ -28,29 +43,19 @@ namespace evtol
         double charge_time;
     };
 
-    struct Event
-    {
-        EventType type;
-        double time_hours;
-        FlightCompleteData flight_data;
-        Event(EventType t, double time, FlightCompleteData fd) : type(t), time_hours(time), flight_data(std::move(fd)) {}
-
-        bool operator<(const Event &other) const
-        {
-            return time_hours > other.time_hours;
-        }
-    };
-
     struct FaultData
     {
         int aircraft_id;
         double fault_time;
     };
 
+    using EventData = std::variant<FlightCompleteData, ChargingCompleteData, FaultData>;
+    using SimulationEvent = Event<EventData>;
+
     class SimulationEngine
     {
     private:
-        std::priority_queue<Event> event_queue_;
+        std::priority_queue<SimulationEvent> event_queue_;
         double current_time_hours_;
         double simulation_duration_hours_;
 
@@ -82,61 +87,27 @@ namespace evtol
             }
         }
         template <typename Fleet>
-        void process_event(const Event &event, Fleet &fleet)
+        void process_event(const SimulationEvent &event, Fleet &fleet)
         {
-            auto aircraft_it = fleet.end();
-            for (auto it = fleet.begin(); it != fleet.end(); ++it)
-            {
-                if ((*it)->get_id() == event.flight_data.aircraft_id)
-                {
-                    aircraft_it = it;
-                    break;
-                }
-            }
-            switch (event.type)
-            {
-            case EventType::FLIGHT_COMPLETE:
-                if (aircraft_it != fleet.end())
-                {
-                    auto &aircraft = *aircraft_it;
-
-                    aircraft->discharge_battery();
-
-                    if (event.flight_data.fault_occurred)
-                    {
-                        std::cout << "Fault occurred for aircraft ID: " << aircraft->get_id() << "\n";
-                    }
-                    // TODO need to handle charging queue or manager here
-                    // for now just have infinite chargers
-                    schedule_charging(aircraft.get_id());
-                }
-                break;
-            case EventType::CHARGING_COMPLETE:
-                // handle charging started event here
-                // e.g., handle_charging_started(...);
-                break;
-            case EventType::FAULT_OCCURRED:
-                // handle fault event here
-                // e.g., handle_fault(...);
-                break;
-            default:
-                // unknown event type
-                break;
-            }
+            std::visit([&](const auto &data)
+                       {
+            using T = std::decay_t<decltype(data)>;
+            
+            if constexpr (std::is_same_v<T, FlightCompleteData>) {
+                handle_flight_complete(data, fleet);
+            } else if constexpr (std::is_same_v<T, ChargingCompleteData>) {
+                handle_charging_complete(data, fleet);
+            } else if constexpr (std::is_same_v<T, FaultData>) {
+                handle_fault(data, fleet);
+            } }, event.data);
         }
 
-        void schedule_event(EventType type, double time_hours, FlightCompleteData flight_data)
+        void schedule_event(EventType type, double time_hours, EventData data)
         {
             if (time_hours <= simulation_duration_hours_)
             {
-                event_queue_.emplace(type, time_hours, flight_data);
+                event_queue_.emplace(type, time_hours, data);
             }
-        }
-
-        void print_state()
-        {
-            std::cout << "Current simulation time: " << current_time_hours_ << " hours\n";
-            std::cout << "Simulation duration: " << simulation_duration_hours_ << " hours\n";
         }
 
     private:
@@ -168,6 +139,60 @@ namespace evtol
                       << flight_time << " hours. Fault occurred: "
                       << (fault_occurred ? "yes" : "no") << "\n";
             schedule_event(EventType::FLIGHT_COMPLETE, current_time_hours_ + flight_time, flight_data);
+        }
+
+        template <typename Fleet>
+        void handle_flight_complete(const FlightCompleteData &data, Fleet &fleet)
+        {
+            auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
+                                            [&](const auto &aircraft)
+                                            { return aircraft->get_id() == data.aircraft_id; });
+
+            if (aircraft_it != fleet.end())
+            {
+                auto &aircraft = *aircraft_it;
+
+                aircraft->discharge_battery();
+
+                schedule_charging(aircraft.get());
+            }
+        }
+
+        template <typename Fleet>
+        void handle_charging_complete(const ChargingCompleteData &data, Fleet &fleet)
+        {
+            auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
+                                            [&](const auto &aircraft)
+                                            { return aircraft->get_id() == data.aircraft_id; });
+
+            if (aircraft_it != fleet.end())
+            {
+                auto &aircraft = *aircraft_it;
+
+                aircraft->charge_battery();
+
+                if (current_time_hours_ < simulation_duration_hours_)
+                {
+                    schedule_flight(aircraft.get());
+                }
+            }
+        }
+
+        template <typename Fleet>
+        void handle_fault(const FaultData &data, Fleet &fleet)
+        {
+            auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
+                                            [&](const auto &aircraft)
+                                            { return aircraft->get_id() == data.aircraft_id; });
+
+            std::cout << "Handling fault for aircraft ID: " << data.aircraft_id << "\n";
+
+            if (aircraft_it != fleet.end())
+            {
+                // Record the fault occurrence
+                std::cout << "Fault occurred for aircraft ID: " << data.aircraft_id << "\n";
+                // Here you would typically log the fault or take necessary actions
+            }
         }
 
         template <typename Aircraft>

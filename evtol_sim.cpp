@@ -35,10 +35,6 @@ public:
 
         auto start = chrono::high_resolution_clock::now();
 
-        for (size_t i = 0; i < fleet_.size(); ++i)
-        {
-            cout << "Aircraft " << i + 1 << ": " << fleet_[i]->get_manufacturer() << endl;
-        }
         sim_engine_->run_simulation(fleet_);
 
         auto end = chrono::high_resolution_clock::now();

@@ -63,8 +63,15 @@ namespace evtol
 
         virtual ~Aircraft() = default;
 
-        double get_flight_time_hours() const override { return 0.0; }
-        double get_flight_distance_miles() const override { return 0.0; }
+        double get_flight_time_hours() const override
+        {
+            return battery_level_ * get_spec().battery_capacity_kwh /
+                   (get_spec().cruise_speed_mph * energy_consumption_per_mile());
+        }
+        double get_flight_distance_miles() const override
+        {
+            return get_flight_time_hours() * get_spec().cruise_speed_mph;
+        }
         bool check_fault_during_flight(double flight_time_hours) override
         {
             double fault_probability = get_spec().fault_probability_per_hour * flight_time_hours;
