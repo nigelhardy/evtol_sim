@@ -9,6 +9,27 @@
 using namespace std;
 using namespace evtol;
 
+template <typename Duration>
+class PerformanceTimer
+{
+private:
+    std::chrono::high_resolution_clock::time_point start_time_;
+
+public:
+    PerformanceTimer() : start_time_(std::chrono::high_resolution_clock::now()) {}
+
+    auto elapsed() const
+    {
+        auto end_time = std::chrono::high_resolution_clock::now();
+        return std::chrono::duration_cast<Duration>(end_time - start_time_);
+    }
+
+    void reset()
+    {
+        start_time_ = std::chrono::high_resolution_clock::now();
+    }
+};
+
 class SimulationRunner
 {
 private:
@@ -36,14 +57,14 @@ public:
         cout << "Simulation Duration: " << SIMULATION_DURATION_HOURS << " hours\n";
         cout << "Starting simulation...\n\n";
 
-        auto start = chrono::high_resolution_clock::now();
+        PerformanceTimer<std::chrono::microseconds> timer;
 
         sim_engine_->run_simulation(charger_manager_, fleet_);
 
-        auto end = chrono::high_resolution_clock::now();
-        auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start);
+        auto elapsed = timer.elapsed();
 
-        cout << "Simulation completed in " << elapsed.count() << " ms\n\n";
+        cout << "Simulation completed in " << elapsed.count() << " microseconds (" 
+             << std::fixed << std::setprecision(3) << elapsed.count() / 1000.0 << " ms)\n\n";
 
         display_results();
     }
