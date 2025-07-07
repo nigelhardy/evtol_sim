@@ -43,7 +43,7 @@ public:
 
         cout << "Simulation completed in " << elapsed.count() << " ms\n\n";
 
-        // TODO: Print statistics
+        sim_engine_->print_stats();
     }
 
 private:

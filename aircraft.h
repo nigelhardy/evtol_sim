@@ -55,51 +55,79 @@ namespace evtol
         static inline std::mt19937 rng{std::random_device{}()};
         static inline std::uniform_real_distribution<double> fault_dist{0.0, 1.0};
 
-        int aircraft_id_;
-        double battery_level_;
-
     public:
         Aircraft(int id) : aircraft_id_(id), battery_level_(1.0) {}
 
         virtual ~Aircraft() = default;
+
+        const AircraftSpec &get_spec() const override
+        {
+            return static_cast<const Derived *>(this)->get_aircraft_spec();
+        }
 
         double get_flight_time_hours() const override
         {
             return battery_level_ * get_spec().battery_capacity_kwh /
                    (get_spec().cruise_speed_mph * energy_consumption_per_mile());
         }
+
         double get_flight_distance_miles() const override
         {
             return get_flight_time_hours() * get_spec().cruise_speed_mph;
         }
+
         bool check_fault_during_flight(double flight_time_hours) override
         {
             double fault_probability = get_spec().fault_probability_per_hour * flight_time_hours;
             return fault_dist(rng) < fault_probability;
         }
+
         void discharge_battery() override
         {
             battery_level_ = 0.0;
         }
+
         void charge_battery() override
         {
             battery_level_ = 1.0;
         }
-        double get_battery_level() const override { return battery_level_; }
-        int get_id() const override { return aircraft_id_; }
+
+        double get_battery_level() const override
+        {
+            return battery_level_;
+        }
+
+        int get_id() const override
+        {
+            return aircraft_id_;
+        }
+
         AircraftType get_type() const override
         {
             return static_cast<const Derived *>(this)->get_aircraft_type();
         }
-        std::string get_manufacturer() const override { return get_spec().manufacturer; }
-        const AircraftSpec &get_spec() const override
-        {
-            return static_cast<const Derived *>(this)->get_aircraft_spec();
-        }
-        int get_passenger_count() const override { return 0; }
-        double get_charge_time_hours() const override { return 0.0; }
 
+        std::string get_manufacturer() const override
+        {
+            return get_spec().manufacturer;
+        }
+
+        int get_passenger_count() const override
+        {
+            return get_spec().passenger_count;
+        }
+
+        double get_charge_time_hours() const override
+        {
+            return get_spec().time_to_charge_hours;
+        }
+
+    protected:
         virtual double energy_consumption_per_mile() const = 0;
+
+    private:
+        int aircraft_id_;
+        double battery_level_;
     };
 
 }

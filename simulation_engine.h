@@ -60,6 +60,15 @@ namespace evtol
         std::priority_queue<SimulationEvent> event_queue_;
         double current_time_hours_;
         double simulation_duration_hours_;
+        
+        // Basic stats tracking
+        double total_flight_time_ = 0.0;
+        double total_distance_ = 0.0;
+        int total_flights_ = 0;
+        double total_charge_time_ = 0.0;
+        int total_charges_ = 0;
+        int total_faults_ = 0;
+        double total_passenger_miles_ = 0.0;
 
     public:
         SimulationEngine(double duration_hours = 3.0)
@@ -111,6 +120,18 @@ namespace evtol
                 event_queue_.emplace(type, time_hours, data);
             }
         }
+        
+        void print_stats() const
+        {
+            std::cout << "\n========== Simulation Statistics ==========\n";
+            std::cout << std::fixed << std::setprecision(2);
+            std::cout << "Average flight time per flight: " << (total_flights_ > 0 ? total_flight_time_ / total_flights_ : 0.0) << " hours\n";
+            std::cout << "Average distance traveled per flight: " << (total_flights_ > 0 ? total_distance_ / total_flights_ : 0.0) << " miles\n";
+            std::cout << "Average time charging per charge session: " << (total_charges_ > 0 ? total_charge_time_ / total_charges_ : 0.0) << " hours\n";
+            std::cout << "Total number of faults: " << total_faults_ << "\n";
+            std::cout << "Total passenger miles: " << total_passenger_miles_ << " miles\n";
+            std::cout << "==========================================\n";
+        }
 
     private:
         template <typename Fleet>
@@ -153,6 +174,13 @@ namespace evtol
             if (aircraft_it != fleet.end())
             {
                 auto &aircraft = *aircraft_it;
+                
+                // Record flight stats
+                total_flight_time_ += data.flight_time;
+                total_distance_ += data.distance;
+                total_flights_++;
+                total_passenger_miles_ += data.distance * aircraft->get_passenger_count();
+                if (data.fault_occurred) total_faults_++;
 
                 aircraft->discharge_battery();
 
@@ -177,6 +205,10 @@ namespace evtol
             if (aircraft_it != fleet.end())
             {
                 auto &aircraft = *aircraft_it;
+                
+                // Record charging stats
+                total_charge_time_ += data.charge_time;
+                total_charges_++;
 
                 aircraft->charge_battery();
 
