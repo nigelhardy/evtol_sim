@@ -10,7 +10,6 @@
 
 namespace evtol
 {
-
     enum class EventType
     {
         FLIGHT_COMPLETE,

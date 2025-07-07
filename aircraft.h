@@ -18,7 +18,7 @@ namespace evtol
         double total_flight_time_hours = 0.0;
         double total_distance_miles = 0.0;
         double total_charging_time_hours = 0.0;
-        std::atomic<int> total_faults{0};
+        int total_faults = 0;
         double total_passenger_miles = 0.0;
         int flight_count = 0;
         int charge_count = 0;
@@ -28,7 +28,7 @@ namespace evtol
             : total_flight_time_hours(other.total_flight_time_hours),
               total_distance_miles(other.total_distance_miles),
               total_charging_time_hours(other.total_charging_time_hours),
-              total_faults(other.total_faults.load()),
+              total_faults(other.total_faults),
               total_passenger_miles(other.total_passenger_miles),
               flight_count(other.flight_count),
               charge_count(other.charge_count) {}
@@ -40,7 +40,7 @@ namespace evtol
                 total_flight_time_hours = other.total_flight_time_hours;
                 total_distance_miles = other.total_distance_miles;
                 total_charging_time_hours = other.total_charging_time_hours;
-                total_faults.store(other.total_faults.load());
+                total_faults = other.total_faults;
                 total_passenger_miles = other.total_passenger_miles;
                 flight_count = other.flight_count;
                 charge_count = other.charge_count;
@@ -64,7 +64,7 @@ namespace evtol
 
         void add_fault()
         {
-            total_faults.fetch_add(1, std::memory_order_relaxed);
+            total_faults++;
         }
 
         double avg_flight_time() const
