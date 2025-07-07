@@ -8,7 +8,7 @@ DEBUG_FLAGS = -g -O0 -DDEBUG -fsanitize=address -fsanitize=undefined
 # Project configuration
 TARGET = evtolsim
 SOURCE = evtol_sim.cpp
-HEADERS = aircraft.h aircraft_types.h simulation_engine.h
+HEADERS = aircraft.h aircraft_types.h simulation_engine.h charger_manager.h
 
 # Build directories
 BUILD_DIR = build

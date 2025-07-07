@@ -4,6 +4,8 @@
 #include <memory>
 #include <chrono>
 
+#include "charger_manager.h"
+
 namespace evtol
 {
 
@@ -66,7 +68,7 @@ namespace evtol
         }
 
         template <typename Fleet>
-        void run_simulation(Fleet &fleet)
+        void run_simulation(ChargerManager &charger_mgr, Fleet &fleet)
         {
             schedule_initial_flights(fleet);
 
@@ -83,20 +85,20 @@ namespace evtol
                     break;
                 }
 
-                process_event(event, fleet);
+                process_event(event, charger_mgr, fleet);
             }
         }
         template <typename Fleet>
-        void process_event(const SimulationEvent &event, Fleet &fleet)
+        void process_event(const SimulationEvent &event, ChargerManager &charger_mgr, Fleet &fleet)
         {
             std::visit([&](const auto &data)
                        {
             using T = std::decay_t<decltype(data)>;
             
             if constexpr (std::is_same_v<T, FlightCompleteData>) {
-                handle_flight_complete(data, fleet);
+                handle_flight_complete(data, charger_mgr, fleet);
             } else if constexpr (std::is_same_v<T, ChargingCompleteData>) {
-                handle_charging_complete(data, fleet);
+                handle_charging_complete(data, charger_mgr, fleet);
             } else if constexpr (std::is_same_v<T, FaultData>) {
                 handle_fault(data, fleet);
             } }, event.data);
@@ -142,7 +144,7 @@ namespace evtol
         }
 
         template <typename Fleet>
-        void handle_flight_complete(const FlightCompleteData &data, Fleet &fleet)
+        void handle_flight_complete(const FlightCompleteData &data, ChargerManager &charger_mgr, Fleet &fleet)
         {
             auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
                                             [&](const auto &aircraft)
@@ -154,12 +156,19 @@ namespace evtol
 
                 aircraft->discharge_battery();
 
-                schedule_charging(aircraft.get());
+                if (charger_mgr.request_charger(aircraft->get_id()))
+                {
+                    schedule_charging(aircraft.get());
+                }
+                else
+                {
+                    charger_mgr.add_to_queue(aircraft->get_id());
+                }
             }
         }
 
         template <typename Fleet>
-        void handle_charging_complete(const ChargingCompleteData &data, Fleet &fleet)
+        void handle_charging_complete(const ChargingCompleteData &data, ChargerManager &charger_mgr, Fleet &fleet)
         {
             auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
                                             [&](const auto &aircraft)
@@ -174,6 +183,27 @@ namespace evtol
                 if (current_time_hours_ < simulation_duration_hours_)
                 {
                     schedule_flight(aircraft.get());
+                }
+
+                // start charging any waiting aircraft
+                int next_aircraft_id = charger_mgr.get_next_from_queue();
+                if (next_aircraft_id != -1)
+                {
+                    auto next_aircraft_it = fleet.end();
+                    for (auto it = fleet.begin(); it != fleet.end(); ++it)
+                    {
+                        if ((*it)->get_id() == next_aircraft_id)
+                        {
+                            next_aircraft_it = it;
+                            break;
+                        }
+                    }
+
+                    if (next_aircraft_it != fleet.end())
+                    {
+                        charger_mgr.assign_charger(next_aircraft_id);
+                        schedule_charging(next_aircraft_it->get());
+                    }
                 }
             }
         }
@@ -209,5 +239,4 @@ namespace evtol
                            charge_data);
         }
     };
-
 }

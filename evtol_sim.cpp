@@ -18,6 +18,7 @@ private:
 
     std::vector<std::unique_ptr<AircraftBase>> fleet_;
     std::unique_ptr<SimulationEngine> sim_engine_;
+    ChargerManager charger_manager_;
 
 public:
     SimulationRunner()
@@ -35,7 +36,7 @@ public:
 
         auto start = chrono::high_resolution_clock::now();
 
-        sim_engine_->run_simulation(fleet_);
+        sim_engine_->run_simulation(charger_manager_, fleet_);
 
         auto end = chrono::high_resolution_clock::now();
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start);
