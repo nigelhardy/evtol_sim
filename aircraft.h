@@ -13,7 +13,75 @@ namespace evtol
         DELTA,
         ECHO
     };
+    struct FlightStats
+    {
+        double total_flight_time_hours = 0.0;
+        double total_distance_miles = 0.0;
+        double total_charging_time_hours = 0.0;
+        std::atomic<int> total_faults{0};
+        double total_passenger_miles = 0.0;
+        int flight_count = 0;
+        int charge_count = 0;
 
+        FlightStats() = default;
+        FlightStats(const FlightStats &other)
+            : total_flight_time_hours(other.total_flight_time_hours),
+              total_distance_miles(other.total_distance_miles),
+              total_charging_time_hours(other.total_charging_time_hours),
+              total_faults(other.total_faults.load()),
+              total_passenger_miles(other.total_passenger_miles),
+              flight_count(other.flight_count),
+              charge_count(other.charge_count) {}
+
+        FlightStats &operator=(const FlightStats &other)
+        {
+            if (this != &other)
+            {
+                total_flight_time_hours = other.total_flight_time_hours;
+                total_distance_miles = other.total_distance_miles;
+                total_charging_time_hours = other.total_charging_time_hours;
+                total_faults.store(other.total_faults.load());
+                total_passenger_miles = other.total_passenger_miles;
+                flight_count = other.flight_count;
+                charge_count = other.charge_count;
+            }
+            return *this;
+        }
+
+        void add_flight(double flight_time, double distance, int passengers)
+        {
+            total_flight_time_hours += flight_time;
+            total_distance_miles += distance;
+            total_passenger_miles += passengers * distance;
+            flight_count++;
+        }
+
+        void add_charge_session(double charge_time)
+        {
+            total_charging_time_hours += charge_time;
+            charge_count++;
+        }
+
+        void add_fault()
+        {
+            total_faults.fetch_add(1, std::memory_order_relaxed);
+        }
+
+        double avg_flight_time() const
+        {
+            return flight_count > 0 ? total_flight_time_hours / flight_count : 0.0;
+        }
+
+        double avg_distance() const
+        {
+            return flight_count > 0 ? total_distance_miles / flight_count : 0.0;
+        }
+
+        double avg_charging_time() const
+        {
+            return charge_count > 0 ? total_charging_time_hours / charge_count : 0.0;
+        }
+    };
     struct AircraftSpec
     {
         const std::string manufacturer;
@@ -129,5 +197,4 @@ namespace evtol
         int aircraft_id_;
         double battery_level_;
     };
-
 }

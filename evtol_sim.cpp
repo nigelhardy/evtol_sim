@@ -18,6 +18,8 @@ private:
 
     std::vector<std::unique_ptr<AircraftBase>> fleet_;
     std::unique_ptr<SimulationEngine> sim_engine_;
+    std::unique_ptr<StatisticsCollector> stats_collector_;
+
     ChargerManager charger_manager_;
 
 public:
@@ -43,20 +45,35 @@ public:
 
         cout << "Simulation completed in " << elapsed.count() << " ms\n\n";
 
-        sim_engine_->print_stats();
+        display_results();
     }
 
 private:
     void initialize_simulation()
     {
         fleet_ = AircraftFactory<>::create_fleet(FLEET_SIZE);
+        stats_collector_ = std::make_unique<StatisticsCollector>();
 
-        sim_engine_ = std::make_unique<SimulationEngine>(SIMULATION_DURATION_HOURS);
+        sim_engine_ = std::make_unique<SimulationEngine>(*stats_collector_, SIMULATION_DURATION_HOURS);
     }
 
     void display_results()
     {
-        cout << "Simulation Results" << endl;
+        cout << stats_collector_->generate_report();
+    }
+
+    void display_performance_metrics()
+    {
+        auto summary = stats_collector_->get_summary_stats();
+
+        cout << "========== Summary Statistics ==========\n";
+        cout << "Total Flight Time: " << summary.total_flight_time << " hours\n";
+        cout << "Total Distance: " << summary.total_distance << " miles\n";
+        cout << "Total Charging Time: " << summary.total_charging_time << " hours\n";
+        cout << "Total Faults: " << summary.total_faults << "\n";
+        cout << "Total Passenger Miles: " << summary.total_passenger_miles << "\n";
+        cout << "Total Flights: " << summary.total_flights << "\n";
+        cout << "Total Charge Sessions: " << summary.total_charges << "\n\n";
     }
 };
 
