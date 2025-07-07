@@ -14,25 +14,31 @@ namespace evtol
         FAULT_OCCURRED
     };
 
-    struct Event
-    {
-        EventType type;
-        double time_hours;
-
-        Event(EventType t, double time) : type(t), time_hours(time) {}
-
-        bool operator<(const Event &other) const
-        {
-            return time_hours > other.time_hours;
-        }
-    };
-
     struct FlightCompleteData
     {
         int aircraft_id;
         double flight_time;
         double distance;
         bool fault_occurred;
+    };
+
+    struct ChargingCompleteData
+    {
+        int aircraft_id;
+        double charge_time;
+    };
+
+    struct Event
+    {
+        EventType type;
+        double time_hours;
+        FlightCompleteData flight_data;
+        Event(EventType t, double time, FlightCompleteData fd) : type(t), time_hours(time), flight_data(std::move(fd)) {}
+
+        bool operator<(const Event &other) const
+        {
+            return time_hours > other.time_hours;
+        }
     };
 
     struct FaultData
@@ -78,13 +84,32 @@ namespace evtol
         template <typename Fleet>
         void process_event(const Event &event, Fleet &fleet)
         {
-            (void)fleet; // Suppress unused parameter warning
-
+            auto aircraft_it = fleet.end();
+            for (auto it = fleet.begin(); it != fleet.end(); ++it)
+            {
+                if ((*it)->get_id() == event.flight_data.aircraft_id)
+                {
+                    aircraft_it = it;
+                    break;
+                }
+            }
             switch (event.type)
             {
             case EventType::FLIGHT_COMPLETE:
-                // handle flight complete event here
-                // e.g., handle_flight_complete(...);
+                if (aircraft_it != fleet.end())
+                {
+                    auto &aircraft = *aircraft_it;
+
+                    aircraft->discharge_battery();
+
+                    if (event.flight_data.fault_occurred)
+                    {
+                        std::cout << "Fault occurred for aircraft ID: " << aircraft->get_id() << "\n";
+                    }
+                    // TODO need to handle charging queue or manager here
+                    // for now just have infinite chargers
+                    schedule_charging(aircraft.get_id());
+                }
                 break;
             case EventType::CHARGING_COMPLETE:
                 // handle charging started event here
@@ -100,11 +125,11 @@ namespace evtol
             }
         }
 
-        void schedule_event(EventType type, double time_hours)
+        void schedule_event(EventType type, double time_hours, FlightCompleteData flight_data)
         {
             if (time_hours <= simulation_duration_hours_)
             {
-                event_queue_.emplace(type, time_hours);
+                event_queue_.emplace(type, time_hours, flight_data);
             }
         }
 
@@ -131,12 +156,32 @@ namespace evtol
             double flight_time = aircraft->get_flight_time_hours();
 
             bool fault_occurred = aircraft->check_fault_during_flight(flight_time);
+
+            FlightCompleteData flight_data{
+                aircraft->get_id(),
+                flight_time,
+                distance,
+                fault_occurred};
             // Adding to quiet the warning about unused variable for now
             std::cout << "Scheduling flight for aircraft ID: " << aircraft->get_id()
                       << " with distance: " << distance << " miles and flight time: "
                       << flight_time << " hours. Fault occurred: "
                       << (fault_occurred ? "yes" : "no") << "\n";
-            schedule_event(EventType::FLIGHT_COMPLETE, current_time_hours_ + flight_time);
+            schedule_event(EventType::FLIGHT_COMPLETE, current_time_hours_ + flight_time, flight_data);
+        }
+
+        template <typename Aircraft>
+        void schedule_charging(Aircraft *aircraft)
+        {
+            double charge_time = aircraft->get_charge_time_hours();
+
+            ChargingCompleteData charge_data{
+                aircraft->get_id(),
+                charge_time};
+
+            schedule_event(EventType::CHARGING_COMPLETE,
+                           current_time_hours_ + charge_time,
+                           charge_data);
         }
     };
 

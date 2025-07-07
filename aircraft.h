@@ -1,10 +1,10 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <random>
 
 namespace evtol
 {
-
     enum class AircraftType
     {
         ALPHA,
@@ -52,6 +52,9 @@ namespace evtol
     class Aircraft : public AircraftBase
     {
     private:
+        static inline std::mt19937 rng{std::random_device{}()};
+        static inline std::uniform_real_distribution<double> fault_dist{0.0, 1.0};
+
         int aircraft_id_;
         double battery_level_;
 
@@ -62,17 +65,29 @@ namespace evtol
 
         double get_flight_time_hours() const override { return 0.0; }
         double get_flight_distance_miles() const override { return 0.0; }
-        bool check_fault_during_flight(double /*flight_time_hours*/) override { return false; }
-        void discharge_battery() override {}
-        void charge_battery() override {}
+        bool check_fault_during_flight(double flight_time_hours) override
+        {
+            double fault_probability = get_spec().fault_probability_per_hour * flight_time_hours;
+            return fault_dist(rng) < fault_probability;
+        }
+        void discharge_battery() override
+        {
+            battery_level_ = 0.0;
+        }
+        void charge_battery() override
+        {
+            battery_level_ = 1.0;
+        }
         double get_battery_level() const override { return battery_level_; }
         int get_id() const override { return aircraft_id_; }
-        AircraftType get_type() const override { return AircraftType::ALPHA; }
+        AircraftType get_type() const override
+        {
+            return static_cast<const Derived *>(this)->get_aircraft_type();
+        }
         std::string get_manufacturer() const override { return get_spec().manufacturer; }
         const AircraftSpec &get_spec() const override
         {
-            static AircraftSpec dummy_spec{"Dummy Manufacturer", 0.0, 0.0, 0.0, 0, 0.0};
-            return dummy_spec;
+            return static_cast<const Derived *>(this)->get_aircraft_spec();
         }
         int get_passenger_count() const override { return 0; }
         double get_charge_time_hours() const override { return 0.0; }
