@@ -4,6 +4,7 @@
 
 #include "aircraft.h"
 #include "aircraft_types.h"
+#include "simulation_engine.h"
 
 using namespace std;
 using namespace evtol;
@@ -16,6 +17,7 @@ private:
     static constexpr double SIMULATION_DURATION_HOURS = 3.0;
 
     std::vector<std::unique_ptr<AircraftBase>> fleet_;
+    std::unique_ptr<SimulationEngine> sim_engine_;
 
 public:
     SimulationRunner()
@@ -33,11 +35,11 @@ public:
 
         auto start = chrono::high_resolution_clock::now();
 
-        // TODO Implement Simulation
         for (size_t i = 0; i < fleet_.size(); ++i)
         {
             cout << "Aircraft " << i + 1 << ": " << fleet_[i]->get_manufacturer() << endl;
         }
+        sim_engine_->run_simulation(fleet_);
 
         auto end = chrono::high_resolution_clock::now();
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(end - start);
@@ -51,6 +53,8 @@ private:
     void initialize_simulation()
     {
         fleet_ = AircraftFactory<>::create_fleet(FLEET_SIZE);
+
+        sim_engine_ = std::make_unique<SimulationEngine>(SIMULATION_DURATION_HOURS);
     }
 
     void display_results()
