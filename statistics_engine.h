@@ -26,6 +26,7 @@ namespace evtol
     {
     private:
         std::unordered_map<AircraftType, FlightStats> stats_;
+        std::unordered_map<AircraftType, int> aircraft_counts_;
 
         static constexpr const char *aircraft_type_names[] = {
             "Alpha", "Beta", "Charlie", "Delta", "Echo"};
@@ -38,9 +39,36 @@ namespace evtol
             stats_.emplace(AircraftType::CHARLIE, FlightStats{});
             stats_.emplace(AircraftType::DELTA, FlightStats{});
             stats_.emplace(AircraftType::ECHO, FlightStats{});
+            
+            // Initialize aircraft counts to 0
+            aircraft_counts_[AircraftType::ALPHA] = 0;
+            aircraft_counts_[AircraftType::BETA] = 0;
+            aircraft_counts_[AircraftType::CHARLIE] = 0;
+            aircraft_counts_[AircraftType::DELTA] = 0;
+            aircraft_counts_[AircraftType::ECHO] = 0;
         }
 
         virtual ~StatisticsCollector() = default;
+
+        /**
+         * Set the count of aircraft for each type
+         * @param fleet The fleet to count aircraft types from
+         */
+        template <typename Fleet>
+        void set_aircraft_counts(const Fleet& fleet)
+        {
+            // Reset counts
+            for (auto& [type, count] : aircraft_counts_)
+            {
+                count = 0;
+            }
+            
+            // Count aircraft by type
+            for (const auto& aircraft : fleet)
+            {
+                aircraft_counts_[aircraft->get_type()]++;
+            }
+        }
 
         // allow mock classes to override (since not allowed with template methods)
         virtual void record_flight(AircraftType type, double flight_time, double distance, int passengers)
@@ -130,7 +158,8 @@ namespace evtol
 
             for (const auto &[type, stats] : stats_)
             {
-                oss << aircraft_type_names[static_cast<int>(type)] << " Aircraft:\n";
+                int count = aircraft_counts_.at(type);
+                oss << aircraft_type_names[static_cast<int>(type)] << " Aircraft(" << count << "):\n";
                 oss << "  Average Flight Time: " << stats.avg_flight_time() << " hours\n";
                 oss << "  Average Distance: " << stats.avg_distance() << " miles\n";
                 oss << "  Average Charging Time: " << stats.avg_charging_time() << " hours\n";

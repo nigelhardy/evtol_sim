@@ -99,6 +99,10 @@ private:
     {
         fleet_ = AircraftFactory<>::create_fleet(FLEET_SIZE);
         stats_collector_ = std::make_unique<StatisticsCollector>();
+        
+        // Set aircraft counts for proper reporting
+        stats_collector_->set_aircraft_counts(fleet_);
+        
         sim_runner_ = std::make_unique<evtol::SimulationRunner>(*stats_collector_, config_);
     }
 
