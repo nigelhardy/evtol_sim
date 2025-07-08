@@ -9,8 +9,8 @@ TEST_FLAGS = -g -O0 -DDEBUG
 # Project configuration
 TARGET = evtolsim
 SOURCES = evtol_sim.cpp aircraft_state.cpp simulation_config.cpp frame_based_simulation.cpp \
-          event_driven_simulation.cpp event_driven_simulation_engine.cpp simulation_factory.cpp \
-          simulation_runner.cpp
+          event_driven_simulation.cpp event_driven_simulation_engine.cpp \
+          
 HEADERS = aircraft.h aircraft_types.h charger_manager.h statistics_engine.h \
           simulation_interface.h simulation_factory.h simulation_config.h aircraft_state.h \
           frame_based_simulation.h event_driven_simulation.h event_driven_simulation_engine.h \

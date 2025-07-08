@@ -85,7 +85,6 @@ private:
         // use default 3.0 duration as specified in problem statement
         config_.simulation_duration_hours = SIMULATION_DURATION_HOURS;
         config_.parse_args(argc, argv);
-        config_.load_from_env();
 
         if (!config_.validate())
         {

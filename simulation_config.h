@@ -15,7 +15,6 @@ namespace evtol
         // Frame-based specific settings
         double frame_time_seconds = 60.0;  // 1 minute frames
         int num_threads = static_cast<int>(std::thread::hardware_concurrency());
-        double speed_multiplier = 1.0;
         
         // Performance settings
         bool enable_multithreading = true;
@@ -27,11 +26,6 @@ namespace evtol
          * @param argv Argument values
          */
         void parse_args(int argc, char* argv[]);
-        
-        /**
-         * Load configuration from environment variables
-         */
-        void load_from_env();
         
         /**
          * Validate configuration settings
