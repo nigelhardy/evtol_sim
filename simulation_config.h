@@ -19,6 +19,7 @@ namespace evtol
         // Performance settings
         bool enable_multithreading = true;
         bool enable_detailed_logging = false;
+        bool enable_partial_flights = true;
         
         /**
          * Parse configuration from command line arguments

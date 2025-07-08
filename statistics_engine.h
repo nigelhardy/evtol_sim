@@ -178,7 +178,7 @@ namespace evtol
             return agg(stats_);
         }
 
-        std::string generate_report() const
+        std::string generate_report(bool show_partial_activities = true) const
         {
             std::ostringstream oss;
 
@@ -199,8 +199,8 @@ namespace evtol
                 oss << "  Total Flights: " << stats.flight_count << "\n";
                 oss << "  Total Charge Sessions: " << stats.charge_count << "\n";
                 
-                // Add partial activities reporting
-                if (stats.partial_flight_count > 0 || stats.partial_charge_count > 0) {
+                // Add partial activities reporting (only if enabled)
+                if (show_partial_activities && (stats.partial_flight_count > 0 || stats.partial_charge_count > 0)) {
                     oss << "  --- Partial Activities (when simulation ended) ---\n";
                     if (stats.partial_flight_count > 0) {
                         oss << "  Partial Flights: " << stats.partial_flight_count << "\n";

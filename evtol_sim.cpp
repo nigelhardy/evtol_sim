@@ -105,7 +105,7 @@ private:
 
     void display_results()
     {
-        cout << stats_collector_->generate_report();
+        cout << stats_collector_->generate_report(config_.enable_detailed_logging);
     }
 
     void display_performance_metrics()

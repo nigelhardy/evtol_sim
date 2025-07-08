@@ -70,6 +70,7 @@ namespace evtol
         std::unordered_map<int, double> flight_start_times_;
         std::unordered_map<int, double> charging_start_times_;
         bool enable_detailed_logging_;
+        bool enable_partial_flights_;
 
         void log_event(const std::string& message) const
         {
@@ -80,9 +81,9 @@ namespace evtol
         }
 
     public:
-        EventDrivenSimulation(StatisticsCollector &stats, double duration_hours = 3.0, bool detailed_logging = false)
+        EventDrivenSimulation(StatisticsCollector &stats, double duration_hours = 3.0, bool detailed_logging = false, bool partial_flights = true)
             : current_time_hours_(0.0), simulation_duration_hours_(duration_hours),
-              stats_collector_(stats), enable_detailed_logging_(detailed_logging)
+              stats_collector_(stats), enable_detailed_logging_(detailed_logging), enable_partial_flights_(partial_flights)
         {
         }
 
@@ -139,7 +140,27 @@ namespace evtol
 
         void schedule_event(EventType type, double time_hours, EventData data)
         {
-            if (time_hours <= simulation_duration_hours_)
+            double scheduled_time = time_hours;
+            bool is_partial_event = false;
+            
+            // For flight events that would extend beyond simulation duration,
+            // schedule them at simulation end time as partial events (if enabled)
+            if (time_hours > simulation_duration_hours_ && type == EventType::FLIGHT_COMPLETE && enable_partial_flights_)
+            {
+                scheduled_time = simulation_duration_hours_;
+                is_partial_event = true;
+            }
+            
+            // For charging events that would extend beyond simulation duration,
+            // schedule them at simulation end time as partial events (if enabled)
+            if (time_hours > simulation_duration_hours_ && type == EventType::CHARGING_COMPLETE && enable_partial_flights_)
+            {
+                scheduled_time = simulation_duration_hours_;
+                is_partial_event = true;
+            }
+            
+            // Only schedule if within simulation duration or it's a partial event
+            if (scheduled_time <= simulation_duration_hours_)
             {
                 std::string event_type_str;
                 switch (type) {
@@ -160,8 +181,17 @@ namespace evtol
                     return -1;
                 }, data);
                 
-                log_event("Scheduled " + event_type_str + " event for aircraft " + std::to_string(aircraft_id) + " at time " + std::to_string(time_hours) + "h");
-                event_queue_.emplace(type, time_hours, data);
+                if (is_partial_event)
+                {
+                    log_event("Scheduled partial " + event_type_str + " event for aircraft " + std::to_string(aircraft_id) + 
+                             " at time " + std::to_string(scheduled_time) + "h (originally " + std::to_string(time_hours) + "h)");
+                }
+                else
+                {
+                    log_event("Scheduled " + event_type_str + " event for aircraft " + std::to_string(aircraft_id) + " at time " + std::to_string(scheduled_time) + "h");
+                }
+                
+                event_queue_.emplace(type, scheduled_time, data);
             }
         }
 
@@ -408,6 +438,13 @@ namespace evtol
                     // Calculate partial distance based on partial flight time
                     double partial_distance = (partial_flight_time / data.flight_time) * data.distance;
                     
+                    if (enable_detailed_logging_)
+                    {
+                        log_event("Processing partial flight for aircraft " + std::to_string(data.aircraft_id) + 
+                                 " (flew " + std::to_string(partial_flight_time) + "h/" + std::to_string(data.flight_time) + 
+                                 "h, " + std::to_string(partial_distance) + "/" + std::to_string(data.distance) + " miles)");
+                    }
+                    
                     stats_collector_.record_partial_flight(aircraft->get_type(), partial_flight_time,
                                                           partial_distance, aircraft->get_passenger_count());
                 }
@@ -432,6 +469,13 @@ namespace evtol
                     double charge_start_time = start_it->second;
                     double partial_charge_time = simulation_duration_hours_ - charge_start_time;
                     
+                    if (enable_detailed_logging_)
+                    {
+                        log_event("Processing partial charge for aircraft " + std::to_string(data.aircraft_id) + 
+                                 " (charged " + std::to_string(partial_charge_time) + "h/" + std::to_string(data.charge_time) + 
+                                 "h, waited: " + std::to_string(data.waiting_time) + "h)");
+                    }
+                    
                     stats_collector_.record_partial_charge(aircraft->get_type(), partial_charge_time);
                 }
             }
@@ -448,9 +492,9 @@ namespace evtol
         std::unique_ptr<EventDrivenSimulation> simulation_;
 
     public:
-        EventDrivenSimulationEngine(StatisticsCollector &stats, double duration_hours = 3.0, bool detailed_logging = false)
+        EventDrivenSimulationEngine(StatisticsCollector &stats, double duration_hours = 3.0, bool detailed_logging = false, bool partial_flights = true)
             : SimulationEngineBase(stats, duration_hours), 
-              simulation_(std::make_unique<EventDrivenSimulation>(stats, duration_hours, detailed_logging))
+              simulation_(std::make_unique<EventDrivenSimulation>(stats, duration_hours, detailed_logging, partial_flights))
         {
         }
 

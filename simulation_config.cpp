@@ -38,6 +38,10 @@ namespace evtol
             {
                 enable_detailed_logging = true;
             }
+            else if (strcmp(argv[i], "--no-partial-flights") == 0)
+            {
+                enable_partial_flights = false;
+            }
             else if (strcmp(argv[i], "--help") == 0)
             {
                 std::cout << "eVTOL Simulation Options:" << std::endl;
@@ -48,6 +52,7 @@ namespace evtol
                 std::cout << "  --threads <count>          Number of threads (default: auto)" << std::endl;
                 std::cout << "  --no-multithreading        Disable multithreading" << std::endl;
                 std::cout << "  --detailed-logging         Enable detailed logging" << std::endl;
+                std::cout << "  --no-partial-flights       Disable partial flights/charging at simulation end" << std::endl;
                 std::cout << "  --help                     Show this help message" << std::endl;
                 exit(0);
             }

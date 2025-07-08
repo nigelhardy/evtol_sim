@@ -159,6 +159,45 @@ namespace evtol
     // Need to check the existing charger manager interface to make sure these methods exist
     // For now, I'll implement placeholder methods that would need to be added to ChargerManager
     
+    void FrameBasedSimulationEngine::handle_partial_flight(std::unique_ptr<AircraftBase> &aircraft, AircraftFrameData &frame_data)
+    {
+        // Calculate how much of the flight was completed
+        double total_flight_time = frame_data.current_flight_time;
+        double remaining_time_seconds = frame_data.time_remaining;
+        double completed_flight_time = total_flight_time - (remaining_time_seconds / 3600.0); // Convert to hours
+        
+        // Calculate partial distance
+        double partial_distance = (completed_flight_time / total_flight_time) * frame_data.current_flight_distance;
+        
+        if (config_.enable_detailed_logging)
+        {
+            log_event("Processing partial flight for aircraft " + std::to_string(aircraft->get_id()) + 
+                     " (flew " + std::to_string(completed_flight_time) + "h/" + std::to_string(total_flight_time) + 
+                     "h, " + std::to_string(partial_distance) + "/" + std::to_string(frame_data.current_flight_distance) + " miles)");
+        }
+        
+        // Record partial flight statistics
+        stats_collector_.record_partial_flight(aircraft->get_type(), completed_flight_time, partial_distance, aircraft->get_passenger_count());
+    }
+
+    void FrameBasedSimulationEngine::handle_partial_charging(std::unique_ptr<AircraftBase> &aircraft, AircraftFrameData &frame_data)
+    {
+        // Calculate how much charging was completed
+        double total_charge_time = aircraft->get_charge_time_hours();
+        double remaining_time_seconds = frame_data.time_remaining;
+        double completed_charge_time = total_charge_time - (remaining_time_seconds / 3600.0); // Convert to hours
+        
+        if (config_.enable_detailed_logging)
+        {
+            log_event("Processing partial charge for aircraft " + std::to_string(aircraft->get_id()) + 
+                     " (charged " + std::to_string(completed_charge_time) + "h/" + std::to_string(total_charge_time) + 
+                     "h, waited: " + std::to_string(frame_data.accumulated_waiting_time / 3600.0) + "h)");
+        }
+        
+        // Record partial charging statistics
+        stats_collector_.record_partial_charge(aircraft->get_type(), completed_charge_time);
+    }
+
     std::string FrameBasedSimulationEngine::aircraft_type_to_string(AircraftType type)
     {
         static const char* aircraft_type_names[] = {
