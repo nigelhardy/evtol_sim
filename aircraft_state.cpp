@@ -43,7 +43,7 @@ namespace evtol
         {
             // Reset flight-specific data
             current_flight_time.store(duration / 3600.0);  // Convert seconds to hours
-            current_flight_distance.store(0.0);  // Will be set by calling code
+            // Note: current_flight_distance will be set by calling code after reset
         }
     }
 

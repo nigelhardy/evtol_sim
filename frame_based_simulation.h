@@ -386,11 +386,15 @@ namespace evtol
         double flight_time = aircraft->get_flight_time_hours();
         double flight_distance = aircraft->get_flight_distance_miles();
         
+        // Set flight-specific data first
         frame_data.current_flight_time = flight_time;
         frame_data.current_flight_distance = flight_distance;
-        frame_data.fault_occurred = aircraft->check_fault_during_flight(flight_time);
+        bool will_fault = aircraft->check_fault_during_flight(flight_time);
         
         frame_data.reset_for_activity(AircraftState::FLYING, flight_time * 3600.0); // Convert to seconds
+        
+        // Set fault status after reset (since reset clears fault_occurred)
+        frame_data.fault_occurred = will_fault;
     }
 
     template <typename Fleet>
