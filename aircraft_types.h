@@ -1,5 +1,6 @@
 #pragma once
 #include "aircraft.h"
+#include <random>
 
 namespace evtol
 {
@@ -123,6 +124,9 @@ namespace evtol
     class AircraftFactory
     {
     private:
+        static inline std::mt19937 rng{std::random_device{}()};
+        static inline std::uniform_int_distribution<int> aircraft_dist{0, 4};
+
     public:
         static std::vector<std::unique_ptr<AircraftBase>> create_fleet(int size)
         {
@@ -131,16 +135,26 @@ namespace evtol
 
             for (int i = 0; i < size; ++i)
             {
-                if (i % 5 == 0)
+                int aircraft_type = aircraft_dist(rng);
+                
+                switch (aircraft_type)
+                {
+                case 0:
                     fleet.emplace_back(std::make_unique<AlphaAircraft>(i));
-                else if (i % 5 == 1)
+                    break;
+                case 1:
                     fleet.emplace_back(std::make_unique<BetaAircraft>(i));
-                else if (i % 5 == 2)
+                    break;
+                case 2:
                     fleet.emplace_back(std::make_unique<CharlieAircraft>(i));
-                else if (i % 5 == 3)
+                    break;
+                case 3:
                     fleet.emplace_back(std::make_unique<DeltaAircraft>(i));
-                else
+                    break;
+                case 4:
                     fleet.emplace_back(std::make_unique<EchoAircraft>(i));
+                    break;
+                }
             }
 
             return fleet;

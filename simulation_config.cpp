@@ -50,7 +50,6 @@ namespace evtol
                 std::cout << "  --duration <hours>         Simulation duration in hours (default: 3.0)" << std::endl;
                 std::cout << "  --frame-time <seconds>     Frame time in seconds (default: 60.0)" << std::endl;
                 std::cout << "  --threads <count>          Number of threads (default: auto)" << std::endl;
-                std::cout << "  --speed <multiplier>       Speed multiplier (default: 1.0)" << std::endl;
                 std::cout << "  --no-multithreading        Disable multithreading" << std::endl;
                 std::cout << "  --detailed-logging         Enable detailed logging" << std::endl;
                 std::cout << "  --help                     Show this help message" << std::endl;
@@ -105,27 +104,6 @@ namespace evtol
             speed_multiplier = std::stod(env_speed);
         }
         
-        const char* env_visualization = std::getenv("EVTOL_VISUALIZATION");
-        if (env_visualization)
-        {
-            enable_visualization = (strcmp(env_visualization, "true") == 0 || 
-                                   strcmp(env_visualization, "1") == 0);
-        }
-        
-        const char* env_real_time = std::getenv("EVTOL_REAL_TIME");
-        if (env_real_time)
-        {
-            enable_real_time = (strcmp(env_real_time, "true") == 0 || 
-                               strcmp(env_real_time, "1") == 0);
-        }
-        
-        const char* env_pause_on_fault = std::getenv("EVTOL_PAUSE_ON_FAULT");
-        if (env_pause_on_fault)
-        {
-            pause_on_fault = (strcmp(env_pause_on_fault, "true") == 0 || 
-                             strcmp(env_pause_on_fault, "1") == 0);
-        }
-        
         const char* env_multithreading = std::getenv("EVTOL_MULTITHREADING");
         if (env_multithreading)
         {
@@ -178,12 +156,6 @@ namespace evtol
         {
             std::cerr << "Warning: Large number of threads (" << num_threads 
                       << ") may not improve performance." << std::endl;
-        }
-        
-        if (enable_real_time && speed_multiplier > 10.0)
-        {
-            std::cerr << "Warning: High speed multiplier (" << speed_multiplier 
-                      << ") with real-time mode may not work as expected." << std::endl;
         }
         
         return true;

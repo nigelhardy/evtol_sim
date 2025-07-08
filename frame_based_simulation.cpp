@@ -9,9 +9,7 @@ namespace evtol
         : SimulationEngineBase(stats, config.simulation_duration_hours)
         , config_(config)
         , frame_time_seconds_(config.frame_time_seconds)
-    {
-        speed_multiplier_.store(config.speed_multiplier);
-        
+    {        
         // Validate configuration
         if (!config_.validate())
         {
@@ -29,31 +27,10 @@ namespace evtol
         stop_worker_threads();
     }
 
-    void FrameBasedSimulationEngine::pause()
-    {
-        paused_.store(true);
-    }
-
-    void FrameBasedSimulationEngine::resume()
-    {
-        paused_.store(false);
-    }
-
     void FrameBasedSimulationEngine::stop()
-    {
-        is_running_ = false;
-        paused_.store(false);
-        
+    { 
         // Wake up any waiting threads
         frame_cv_.notify_all();
-    }
-
-    void FrameBasedSimulationEngine::set_speed_multiplier(double multiplier)
-    {
-        if (multiplier > 0.0)
-        {
-            speed_multiplier_.store(multiplier);
-        }
     }
 
     void FrameBasedSimulationEngine::run_simulation_impl(ChargerManager &charger_mgr, void *fleet_ptr)
@@ -161,7 +138,7 @@ namespace evtol
         auto current_time = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_frame_time_).count();
         
-        double target_frame_time_ms = (frame_time_seconds_ * 1000.0) / speed_multiplier_.load();
+        double target_frame_time_ms = (frame_time_seconds_ * 1000.0);
         
         if (elapsed < target_frame_time_ms)
         {

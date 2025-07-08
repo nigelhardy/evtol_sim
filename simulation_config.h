@@ -15,15 +15,7 @@ namespace evtol
         // Frame-based specific settings
         double frame_time_seconds = 60.0;  // 1 minute frames
         int num_threads = static_cast<int>(std::thread::hardware_concurrency());
-        bool enable_visualization = false;
-        bool enable_real_time = false;
         double speed_multiplier = 1.0;
-        
-        // Visualization settings
-        bool show_aircraft_states = true;
-        bool show_charger_status = true;
-        bool show_statistics = true;
-        bool pause_on_fault = false;
         
         // Performance settings
         bool enable_multithreading = true;

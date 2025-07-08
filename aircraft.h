@@ -24,6 +24,14 @@ namespace evtol
         double total_passenger_miles = 0.0;
         int flight_count = 0;
         int charge_count = 0;
+        
+        // Partial activities (when simulation ends mid-activity)
+        double partial_flight_time_hours = 0.0;
+        double partial_distance_miles = 0.0;
+        double partial_charging_time_hours = 0.0;
+        double partial_passenger_miles = 0.0;
+        int partial_flight_count = 0;
+        int partial_charge_count = 0;
 
         FlightStats() = default;
         FlightStats(const FlightStats &other)
@@ -34,7 +42,13 @@ namespace evtol
               total_faults(other.total_faults),
               total_passenger_miles(other.total_passenger_miles),
               flight_count(other.flight_count),
-              charge_count(other.charge_count) {}
+              charge_count(other.charge_count),
+              partial_flight_time_hours(other.partial_flight_time_hours),
+              partial_distance_miles(other.partial_distance_miles),
+              partial_charging_time_hours(other.partial_charging_time_hours),
+              partial_passenger_miles(other.partial_passenger_miles),
+              partial_flight_count(other.partial_flight_count),
+              partial_charge_count(other.partial_charge_count) {}
 
         FlightStats &operator=(const FlightStats &other)
         {
@@ -48,6 +62,12 @@ namespace evtol
                 total_passenger_miles = other.total_passenger_miles;
                 flight_count = other.flight_count;
                 charge_count = other.charge_count;
+                partial_flight_time_hours = other.partial_flight_time_hours;
+                partial_distance_miles = other.partial_distance_miles;
+                partial_charging_time_hours = other.partial_charging_time_hours;
+                partial_passenger_miles = other.partial_passenger_miles;
+                partial_flight_count = other.partial_flight_count;
+                partial_charge_count = other.partial_charge_count;
             }
             return *this;
         }
@@ -83,6 +103,20 @@ namespace evtol
             total_faults++;
         }
 
+        void add_partial_flight(double flight_time, double distance, int passengers)
+        {
+            partial_flight_time_hours += flight_time;
+            partial_distance_miles += distance;
+            partial_passenger_miles += passengers * distance;
+            partial_flight_count++;
+        }
+
+        void add_partial_charge(double charge_time)
+        {
+            partial_charging_time_hours += charge_time;
+            partial_charge_count++;
+        }
+
         double avg_flight_time() const
         {
             return flight_count > 0 ? total_flight_time_hours / flight_count : 0.0;
@@ -113,6 +147,7 @@ namespace evtol
             return total_charging_time_hours + total_waiting_time_hours;
         }
     };
+
     struct AircraftSpec
     {
         const std::string manufacturer;
@@ -121,6 +156,7 @@ namespace evtol
         const double time_to_charge_hours;
         const int passenger_count;
         const double fault_probability_per_hour;
+        // out of scope for this project, but leaving energy usage in class to be dynamic (in theory)
 
         constexpr AircraftSpec(const std::string &mfg, double speed, double battery,
                                double charge_time, int passengers, double fault_prob)
@@ -180,12 +216,16 @@ namespace evtol
         double check_fault_during_flight(double flight_time_hours) override
         {
             double fault_rate = get_spec().fault_probability_per_hour;
-            if (fault_rate <= 0.0) return -1.0;
-            
-            double time_to_fault = -std::log(fault_dist(rng)) / fault_rate;
-            
-            if (time_to_fault < flight_time_hours) {
-                return time_to_fault;
+            if (fault_rate <= 0.0)
+                return -1.0; // never faults
+
+            // Simple probability check for fault during this flight
+            double flight_fault_probability = fault_rate * flight_time_hours;
+            if (fault_dist(rng) < flight_fault_probability)
+            {
+                // Fault occurs - randomly pick a time during the flight
+                // this could be more sophisticated, but should work for our purposes
+                return fault_dist(rng) * flight_time_hours;
             }
             return -1.0;
         }

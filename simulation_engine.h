@@ -66,6 +66,8 @@ namespace evtol
         double simulation_duration_hours_;
         StatisticsCollector &stats_collector_;
         std::unordered_map<int, double> waiting_start_times_;
+        std::unordered_map<int, double> flight_start_times_;
+        std::unordered_map<int, double> charging_start_times_;
 
     public:
         SimulationEngine(StatisticsCollector &stats, double duration_hours = 3.0)
@@ -94,6 +96,9 @@ namespace evtol
 
                 process_event(event, charger_mgr, fleet);
             }
+
+            // Process any remaining activities at simulation end
+            finalize_simulation(fleet);
         }
         template <typename Fleet>
         void process_event(const SimulationEvent &event, ChargerManager &charger_mgr, Fleet &fleet)
@@ -135,6 +140,9 @@ namespace evtol
             double distance = aircraft->get_flight_distance_miles();
             double flight_time = aircraft->get_flight_time_hours();
 
+            // Record flight start time
+            flight_start_times_[aircraft->get_id()] = current_time_hours_;
+
             double fault_time = aircraft->check_fault_during_flight(flight_time);
             bool fault_occurred = (fault_time >= 0.0);
 
@@ -170,6 +178,9 @@ namespace evtol
                 stats_collector_.record_flight(aircraft->get_type(), data.flight_time,
                                                data.distance, aircraft->get_passenger_count());
 
+                // Clean up flight start time tracking
+                flight_start_times_.erase(data.aircraft_id);
+
                 if (!aircraft->is_faulty())
                 {
                     if (charger_mgr.request_charger(aircraft->get_id()))
@@ -199,6 +210,9 @@ namespace evtol
                 aircraft->charge_battery();
 
                 stats_collector_.record_charge_session(aircraft->get_type(), data.charge_time, data.waiting_time);
+
+                // Clean up charging start time tracking
+                charging_start_times_.erase(data.aircraft_id);
 
                 if (current_time_hours_ < simulation_duration_hours_ && !aircraft->is_faulty())
                 {
@@ -257,6 +271,9 @@ namespace evtol
         {
             double charge_time = aircraft->get_charge_time_hours();
 
+            // Record charging start time
+            charging_start_times_[aircraft->get_id()] = current_time_hours_;
+
             ChargingCompleteData charge_data{
                 aircraft->get_id(),
                 charge_time,
@@ -265,6 +282,81 @@ namespace evtol
             schedule_event(EventType::CHARGING_COMPLETE,
                            current_time_hours_ + charge_time,
                            charge_data);
+        }
+
+        template <typename Fleet>
+        void finalize_simulation(Fleet &fleet)
+        {
+            // Set current time to simulation end for partial calculation
+            current_time_hours_ = simulation_duration_hours_;
+
+            // Process remaining unprocessed events to record partial activities
+            while (!event_queue_.empty())
+            {
+                auto event = event_queue_.top();
+                event_queue_.pop();
+
+                std::visit([&](const auto &data)
+                {
+                    using T = std::decay_t<decltype(data)>;
+                    
+                    if constexpr (std::is_same_v<T, FlightCompleteData>) {
+                        handle_partial_flight(data, fleet);
+                    } else if constexpr (std::is_same_v<T, ChargingCompleteData>) {
+                        handle_partial_charge(data, fleet);
+                    }
+                }, event.data);
+            }
+        }
+
+        template <typename Fleet>
+        void handle_partial_flight(const FlightCompleteData &data, Fleet &fleet)
+        {
+            auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
+                                            [&](const auto &aircraft)
+                                            { return aircraft->get_id() == data.aircraft_id; });
+
+            if (aircraft_it != fleet.end())
+            {
+                auto &aircraft = *aircraft_it;
+                
+                // Find flight start time
+                auto start_it = flight_start_times_.find(data.aircraft_id);
+                if (start_it != flight_start_times_.end())
+                {
+                    double flight_start_time = start_it->second;
+                    double partial_flight_time = simulation_duration_hours_ - flight_start_time;
+                    
+                    // Calculate partial distance based on partial flight time
+                    double partial_distance = (partial_flight_time / data.flight_time) * data.distance;
+                    
+                    stats_collector_.record_partial_flight(aircraft->get_type(), partial_flight_time,
+                                                          partial_distance, aircraft->get_passenger_count());
+                }
+            }
+        }
+
+        template <typename Fleet>
+        void handle_partial_charge(const ChargingCompleteData &data, Fleet &fleet)
+        {
+            auto aircraft_it = std::find_if(fleet.begin(), fleet.end(),
+                                            [&](const auto &aircraft)
+                                            { return aircraft->get_id() == data.aircraft_id; });
+
+            if (aircraft_it != fleet.end())
+            {
+                auto &aircraft = *aircraft_it;
+                
+                // Find charging start time
+                auto start_it = charging_start_times_.find(data.aircraft_id);
+                if (start_it != charging_start_times_.end())
+                {
+                    double charge_start_time = start_it->second;
+                    double partial_charge_time = simulation_duration_hours_ - charge_start_time;
+                    
+                    stats_collector_.record_partial_charge(aircraft->get_type(), partial_charge_time);
+                }
+            }
         }
     };
 }

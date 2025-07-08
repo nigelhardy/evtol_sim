@@ -135,26 +135,12 @@ namespace evtol
         const SimulationConfig &get_config() const { return config_; }
 
         // Control methods (delegate to engine)
-        void pause()
-        {
-            if (engine_)
-                engine_->pause();
-        }
-        void resume()
-        {
-            if (engine_)
-                engine_->resume();
-        }
         void stop()
         {
             if (engine_)
                 engine_->stop();
         }
-        void set_speed_multiplier(double multiplier)
-        {
-            if (engine_)
-                engine_->set_speed_multiplier(multiplier);
-        }
+
 
         // Status methods
         bool is_running() const { return engine_ && engine_->is_running(); }

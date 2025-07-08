@@ -64,7 +64,6 @@ public:
         {
             cout << "Frame Time: " << config_.frame_time_seconds << " seconds\n";
             cout << "Threads: " << config_.num_threads << "\n";
-            cout << "Speed Multiplier: " << config_.speed_multiplier << "x\n";
         }
         
         cout << "Starting simulation...\n\n";
@@ -84,6 +83,7 @@ public:
 private:
     void initialize_configuration(int argc, char* argv[])
     {
+        // use default 3.0 duration as specified in problem statement
         config_.simulation_duration_hours = SIMULATION_DURATION_HOURS;
         config_.parse_args(argc, argv);
         config_.load_from_env();

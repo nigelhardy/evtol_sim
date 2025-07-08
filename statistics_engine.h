@@ -21,6 +21,14 @@ namespace evtol
         double total_passenger_miles = 0.0;
         int total_flights = 0;
         int total_charges = 0;
+        
+        // Partial activities
+        double partial_flight_time = 0.0;
+        double partial_distance = 0.0;
+        double partial_charging_time = 0.0;
+        double partial_passenger_miles = 0.0;
+        int partial_flights = 0;
+        int partial_charges = 0;
     };
 
     class StatisticsCollector
@@ -119,6 +127,16 @@ namespace evtol
             stats_[type].add_fault();
         }
 
+        virtual void record_partial_flight(AircraftType type, double flight_time, double distance, int passengers)
+        {
+            stats_[type].add_partial_flight(flight_time, distance, passengers);
+        }
+
+        virtual void record_partial_charge(AircraftType type, double charge_time)
+        {
+            stats_[type].add_partial_charge(charge_time);
+        }
+
         template <typename Metric, typename... Rest>
         void record_additional_metrics(AircraftType type, Metric &&metric, Rest &&...rest)
         {
@@ -179,7 +197,24 @@ namespace evtol
                 oss << "  Total Faults: " << stats.total_faults << "\n";
                 oss << "  Total Passenger Miles: " << stats.total_passenger_miles << "\n";
                 oss << "  Total Flights: " << stats.flight_count << "\n";
-                oss << "  Total Charge Sessions: " << stats.charge_count << "\n\n";
+                oss << "  Total Charge Sessions: " << stats.charge_count << "\n";
+                
+                // Add partial activities reporting
+                if (stats.partial_flight_count > 0 || stats.partial_charge_count > 0) {
+                    oss << "  --- Partial Activities (when simulation ended) ---\n";
+                    if (stats.partial_flight_count > 0) {
+                        oss << "  Partial Flights: " << stats.partial_flight_count << "\n";
+                        oss << "  Partial Flight Time: " << stats.partial_flight_time_hours << " hours\n";
+                        oss << "  Partial Distance: " << stats.partial_distance_miles << " miles\n";
+                        oss << "  Partial Passenger Miles: " << stats.partial_passenger_miles << "\n";
+                    }
+                    if (stats.partial_charge_count > 0) {
+                        oss << "  Partial Charges: " << stats.partial_charge_count << "\n";
+                        oss << "  Partial Charging Time: " << stats.partial_charging_time_hours << " hours\n";
+                    }
+                }
+                
+                oss << "\n";
             }
 
             return oss.str();
@@ -199,6 +234,14 @@ namespace evtol
                 summary.total_passenger_miles += stats.total_passenger_miles;
                 summary.total_flights += stats.flight_count;
                 summary.total_charges += stats.charge_count;
+                
+                // Add partial activities to summary
+                summary.partial_flight_time += stats.partial_flight_time_hours;
+                summary.partial_distance += stats.partial_distance_miles;
+                summary.partial_charging_time += stats.partial_charging_time_hours;
+                summary.partial_passenger_miles += stats.partial_passenger_miles;
+                summary.partial_flights += stats.partial_flight_count;
+                summary.partial_charges += stats.partial_charge_count;
             }
 
             return summary;

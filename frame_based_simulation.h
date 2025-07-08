@@ -23,8 +23,6 @@ namespace evtol
     private:
         SimulationConfig config_;
         std::vector<std::thread> worker_threads_;
-        std::atomic<bool> paused_{false};
-        std::atomic<double> speed_multiplier_{1.0};
 
         // Threading synchronization
         std::condition_variable frame_cv_;
@@ -44,10 +42,7 @@ namespace evtol
         ~FrameBasedSimulationEngine();
 
         // ISimulationEngine interface
-        void pause() override;
-        void resume() override;
         void stop() override;
-        void set_speed_multiplier(double multiplier) override;
 
     protected:
         void run_simulation_impl(ChargerManager &charger_mgr, void *fleet_ptr) override;
@@ -123,13 +118,6 @@ namespace evtol
 
         while (is_running_ && current_time_hours_ < simulation_duration_hours_)
         {
-            // Handle pause
-            if (paused_)
-            {
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                continue;
-            }
-
             // Update frame
             update_frame(charger_mgr, fleet);
 
@@ -342,7 +330,7 @@ namespace evtol
         // Set flight-specific data first
         frame_data.current_flight_time = flight_time;
         frame_data.current_flight_distance = flight_distance;
-        bool will_fault = aircraft->check_fault_during_flight(flight_time);
+        bool will_fault = aircraft->check_fault_during_flight(flight_time) > 0;
 
         frame_data.reset_for_activity(AircraftState::FLYING, flight_time * 3600.0); // Convert to seconds
 

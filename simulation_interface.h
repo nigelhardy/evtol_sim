@@ -28,7 +28,7 @@ namespace evtol
         template <typename Fleet>
         void run_simulation(ChargerManager &charger_mgr, Fleet &fleet)
         {
-            run_simulation_impl(charger_mgr, static_cast<void*>(&fleet));
+            run_simulation_impl(charger_mgr, static_cast<void *>(&fleet));
         }
 
         /**
@@ -50,25 +50,9 @@ namespace evtol
         virtual bool is_running() const = 0;
 
         /**
-         * Pause the simulation (frame-based only)
-         */
-        virtual void pause() {}
-
-        /**
-         * Resume the simulation (frame-based only)
-         */
-        virtual void resume() {}
-
-        /**
          * Stop the simulation
          */
         virtual void stop() {}
-
-        /**
-         * Set simulation speed multiplier (frame-based only)
-         * @param speed_multiplier Speed multiplier (1.0 = normal speed)
-         */
-        virtual void set_speed_multiplier(double /* speed_multiplier */) {}
 
     protected:
         /**
@@ -92,17 +76,12 @@ namespace evtol
 
     public:
         SimulationEngineBase(StatisticsCollector &stats, double duration_hours = 3.0)
-            : current_time_hours_(0.0)
-            , simulation_duration_hours_(duration_hours)
-            , stats_collector_(stats)
-            , is_running_(false)
+            : current_time_hours_(0.0), simulation_duration_hours_(duration_hours), stats_collector_(stats), is_running_(false)
         {
         }
 
         double get_current_time() const override { return current_time_hours_; }
         double get_duration() const override { return simulation_duration_hours_; }
         bool is_running() const override { return is_running_; }
-
-        void stop() override { is_running_ = false; }
     };
 }
