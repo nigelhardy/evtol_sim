@@ -24,7 +24,7 @@ namespace evtol
         double total_passenger_miles = 0.0;
         int flight_count = 0;
         int charge_count = 0;
-        
+
         // Partial activities (when simulation ends mid-activity)
         double partial_flight_time_hours = 0.0;
         double partial_distance_miles = 0.0;
@@ -109,12 +109,22 @@ namespace evtol
             partial_distance_miles += distance;
             partial_passenger_miles += passengers * distance;
             partial_flight_count++;
+
+            // adding partial to total
+            total_flight_time_hours += flight_time;
+            total_distance_miles += distance;
+            total_passenger_miles += passengers * distance;
+            flight_count++;
         }
 
         void add_partial_charge(double charge_time)
         {
             partial_charging_time_hours += charge_time;
             partial_charge_count++;
+
+            // adding partial to total
+            total_charging_time_hours += charge_time;
+            charge_count++;
         }
 
         double avg_flight_time() const

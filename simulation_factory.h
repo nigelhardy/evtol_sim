@@ -26,7 +26,7 @@ namespace evtol
             switch (config.mode)
             {
             case SimulationMode::EVENT_DRIVEN:
-                return std::make_unique<EventDrivenSimulationEngine>(stats, config.simulation_duration_hours);
+                return std::make_unique<EventDrivenSimulationEngine>(stats, config.simulation_duration_hours, config.enable_detailed_logging);
 
             case SimulationMode::FRAME_BASED:
                 return std::make_unique<FrameBasedSimulationEngine>(stats, config);
