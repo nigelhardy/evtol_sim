@@ -7,6 +7,7 @@
 #include <memory>
 #include <chrono>
 #include <future>
+#include <iostream>
 
 #include "simulation_interface.h"
 #include "simulation_config.h"
@@ -133,6 +134,8 @@ namespace evtol
         is_running_ = true;
         last_frame_time_ = std::chrono::high_resolution_clock::now();
         
+        // std::cout << "Starting frame-based simulation loop..." << std::endl;
+        
         while (is_running_ && current_time_hours_ < simulation_duration_hours_)
         {
             // Handle pause
@@ -169,6 +172,11 @@ namespace evtol
             
             // Advance time
             current_time_hours_ += frame_time_seconds_ / 3600.0;
+            
+            // Debug output (disabled)
+            // if (static_cast<int>(current_time_hours_ * 10) % 5 == 0) { // Every 0.5 hours
+            //     std::cout << "Time: " << current_time_hours_ << " hours" << std::endl;
+            // }
             
             // Wait for frame time if real-time mode
             if (config_.enable_real_time)
