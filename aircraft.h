@@ -115,6 +115,8 @@ namespace evtol
         virtual const AircraftSpec &get_spec() const = 0;
         virtual int get_passenger_count() const = 0;
         virtual double get_charge_time_hours() const = 0;
+        virtual bool is_faulty() const = 0;
+        virtual void set_faulty(bool faulty) = 0;
     };
 
     template <typename Derived>
@@ -125,7 +127,7 @@ namespace evtol
         static inline std::uniform_real_distribution<double> fault_dist{0.0, 1.0};
 
     public:
-        Aircraft(int id) : aircraft_id_(id), battery_level_(1.0) {}
+        Aircraft(int id) : aircraft_id_(id), battery_level_(1.0), is_faulty_(false) {}
 
         virtual ~Aircraft() = default;
 
@@ -198,11 +200,22 @@ namespace evtol
             return get_spec().time_to_charge_hours;
         }
 
+        bool is_faulty() const override
+        {
+            return is_faulty_;
+        }
+
+        void set_faulty(bool faulty) override
+        {
+            is_faulty_ = faulty;
+        }
+
     protected:
         virtual double energy_consumption_per_mile() const = 0;
 
     private:
         int aircraft_id_;
         double battery_level_;
+        bool is_faulty_;
     };
 }

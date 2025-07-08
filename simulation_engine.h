@@ -166,18 +166,17 @@ namespace evtol
 
                 stats_collector_.record_flight(aircraft->get_type(), data.flight_time,
                                                data.distance, aircraft->get_passenger_count());
-                if (data.fault_occurred)
-                {
-                    stats_collector_.record_fault(aircraft->get_type());
-                }
 
-                if (charger_mgr.request_charger(aircraft->get_id()))
+                if (!aircraft->is_faulty())
                 {
-                    schedule_charging(aircraft.get());
-                }
-                else
-                {
-                    charger_mgr.add_to_queue(aircraft->get_id());
+                    if (charger_mgr.request_charger(aircraft->get_id()))
+                    {
+                        schedule_charging(aircraft.get());
+                    }
+                    else
+                    {
+                        charger_mgr.add_to_queue(aircraft->get_id());
+                    }
                 }
             }
         }
@@ -197,7 +196,7 @@ namespace evtol
 
                 stats_collector_.record_charge_session(aircraft->get_type(), data.charge_time);
 
-                if (current_time_hours_ < simulation_duration_hours_)
+                if (current_time_hours_ < simulation_duration_hours_ && !aircraft->is_faulty())
                 {
                     schedule_flight(aircraft.get());
                 }
@@ -235,6 +234,7 @@ namespace evtol
             if (aircraft_it != fleet.end())
             {
                 auto &aircraft = *aircraft_it;
+                aircraft->set_faulty(true);
                 std::cout << "FAULT: " << aircraft->get_manufacturer() << " aircraft (ID: " 
                           << data.aircraft_id << ") fault at time " << data.fault_time 
                           << " hours" << std::endl;
