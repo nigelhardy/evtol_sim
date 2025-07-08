@@ -4,6 +4,7 @@
 #include <memory>
 #include <chrono>
 #include <variant>
+#include <iostream>
 
 #include "charger_manager.h"
 #include "statistics_engine.h"
@@ -131,7 +132,15 @@ namespace evtol
             double distance = aircraft->get_flight_distance_miles();
             double flight_time = aircraft->get_flight_time_hours();
 
-            bool fault_occurred = aircraft->check_fault_during_flight(flight_time);
+            double fault_time = aircraft->check_fault_during_flight(flight_time);
+            bool fault_occurred = (fault_time >= 0.0);
+
+            if (fault_occurred) {
+                FaultData fault_data{
+                    aircraft->get_id(),
+                    fault_time};
+                schedule_event(EventType::FAULT_OCCURRED, current_time_hours_ + fault_time, fault_data);
+            }
 
             FlightCompleteData flight_data{
                 aircraft->get_id(),
@@ -225,7 +234,11 @@ namespace evtol
 
             if (aircraft_it != fleet.end())
             {
-                stats_collector_.record_fault((*aircraft_it)->get_type());
+                auto &aircraft = *aircraft_it;
+                std::cout << "FAULT: " << aircraft->get_manufacturer() << " aircraft (ID: " 
+                          << data.aircraft_id << ") fault at time " << data.fault_time 
+                          << " hours" << std::endl;
+                stats_collector_.record_fault(aircraft->get_type());
             }
         }
 

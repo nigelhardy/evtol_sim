@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <random>
+#include <cmath>
 
 namespace evtol
 {
@@ -104,7 +105,7 @@ namespace evtol
         virtual ~AircraftBase() = default;
         virtual double get_flight_time_hours() const = 0;
         virtual double get_flight_distance_miles() const = 0;
-        virtual bool check_fault_during_flight(double flight_time_hours) = 0;
+        virtual double check_fault_during_flight(double flight_time_hours) = 0;
         virtual void discharge_battery() = 0;
         virtual void charge_battery() = 0;
         virtual double get_battery_level() const = 0;
@@ -144,10 +145,17 @@ namespace evtol
             return get_flight_time_hours() * get_spec().cruise_speed_mph;
         }
 
-        bool check_fault_during_flight(double flight_time_hours) override
+        double check_fault_during_flight(double flight_time_hours) override
         {
-            double fault_probability = get_spec().fault_probability_per_hour * flight_time_hours;
-            return fault_dist(rng) < fault_probability;
+            double fault_rate = get_spec().fault_probability_per_hour;
+            if (fault_rate <= 0.0) return -1.0;
+            
+            double time_to_fault = -std::log(fault_dist(rng)) / fault_rate;
+            
+            if (time_to_fault < flight_time_hours) {
+                return time_to_fault;
+            }
+            return -1.0;
         }
 
         void discharge_battery() override
