@@ -2,7 +2,7 @@
 #include <memory>
 #include "simulation_interface.h"
 #include "simulation_config.h"
-#include "event_driven_simulation_engine.h"
+#include "event_driven_simulation.h"
 #include "frame_based_simulation.h"
 
 namespace evtol
