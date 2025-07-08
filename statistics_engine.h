@@ -8,6 +8,19 @@
 
 namespace evtol
 {
+    /**
+     * Summary statistics structure
+     */
+    struct SummaryStats
+    {
+        double total_flight_time = 0.0;
+        double total_distance = 0.0;
+        double total_charging_time = 0.0;
+        int total_faults = 0;
+        double total_passenger_miles = 0.0;
+        int total_flights = 0;
+        int total_charges = 0;
+    };
 
     class StatisticsCollector
     {
@@ -27,6 +40,14 @@ namespace evtol
             stats_.emplace(AircraftType::ECHO, FlightStats{});
         }
 
+        virtual ~StatisticsCollector() = default;
+
+        // allow mock classes to override (since not allowed with template methods)
+        virtual void record_flight(AircraftType type, double flight_time, double distance, int passengers)
+        {
+            stats_[type].add_flight(flight_time, distance, passengers);
+        }
+
         template <typename... MetricArgs>
         void record_flight(AircraftType type, double flight_time, double distance, int passengers, MetricArgs &&...args)
         {
@@ -36,6 +57,11 @@ namespace evtol
             {
                 record_additional_metrics(type, std::forward<MetricArgs>(args)...);
             }
+        }
+        // allow mock classes to override (since not allowed with template methods)
+        virtual void record_charge_session(AircraftType type, double charge_time)
+        {
+            stats_[type].add_charge_session(charge_time);
         }
 
         template <typename... MetricArgs>
@@ -49,7 +75,7 @@ namespace evtol
             }
         }
 
-        void record_fault(AircraftType type)
+        virtual void record_fault(AircraftType type)
         {
             stats_[type].add_fault();
         }
@@ -117,20 +143,8 @@ namespace evtol
             return oss.str();
         }
 
-        auto get_summary_stats() const
+        SummaryStats get_summary_stats() const
         {
-
-            struct SummaryStats
-            {
-                double total_flight_time = 0.0;
-                double total_distance = 0.0;
-                double total_charging_time = 0.0;
-                int total_faults = 0;
-                double total_passenger_miles = 0.0;
-                int total_flights = 0;
-                int total_charges = 0;
-            };
-
             SummaryStats summary;
 
             for (const auto &[type, stats] : stats_)
@@ -145,6 +159,29 @@ namespace evtol
             }
 
             return summary;
+        }
+
+        template <typename ComparisonFunc>
+        AircraftType get_best_performing(ComparisonFunc comp) const
+        {
+            auto best_it = stats_.begin();
+            for (auto it = stats_.begin(); it != stats_.end(); ++it)
+            {
+                if (comp(it->second, best_it->second))
+                {
+                    best_it = it;
+                }
+            }
+
+            return best_it->first;
+        }
+
+        void reset_stats()
+        {
+            for (auto &[type, stats] : stats_)
+            {
+                stats = FlightStats{};
+            }
         }
     };
 

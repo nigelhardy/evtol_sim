@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <memory>
 #include <array>
+#include <vector>
 
 namespace evtol
 {
@@ -89,6 +90,47 @@ namespace evtol
         constexpr int get_total_chargers() const
         {
             return NUM_CHARGERS;
+        }
+
+        // Additional methods for frame-based simulation
+        int get_num_chargers() const
+        {
+            return NUM_CHARGERS;
+        }
+
+        bool is_charger_occupied(int charger_id) const
+        {
+            return available_chargers_.find(charger_id) == available_chargers_.end();
+        }
+
+        int get_aircraft_at_charger(int charger_id) const
+        {
+            for (const auto& pair : aircraft_to_charger_map_)
+            {
+                if (pair.second == charger_id)
+                {
+                    return pair.first;
+                }
+            }
+            return -1;  // No aircraft at this charger
+        }
+
+        int get_charger_id(int aircraft_id) const
+        {
+            auto it = aircraft_to_charger_map_.find(aircraft_id);
+            return (it != aircraft_to_charger_map_.end()) ? it->second : -1;
+        }
+
+        std::vector<int> get_waiting_queue() const
+        {
+            std::vector<int> queue_copy;
+            std::queue<int> temp_queue = waiting_queue_;  // Copy the queue
+            while (!temp_queue.empty())
+            {
+                queue_copy.push_back(temp_queue.front());
+                temp_queue.pop();
+            }
+            return queue_copy;
         }
     };
 

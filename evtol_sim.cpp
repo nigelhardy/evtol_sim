@@ -5,6 +5,8 @@
 #include "aircraft.h"
 #include "aircraft_types.h"
 #include "simulation_engine.h"
+#include "simulation_factory.h"
+#include "simulation_config.h"
 
 using namespace std;
 using namespace evtol;
@@ -30,7 +32,7 @@ public:
     }
 };
 
-class SimulationRunner
+class EvtolSimulationApp
 {
 private:
     static constexpr int FLEET_SIZE = 20;
@@ -38,14 +40,15 @@ private:
     static constexpr double SIMULATION_DURATION_HOURS = 3.0;
 
     std::vector<std::unique_ptr<AircraftBase>> fleet_;
-    std::unique_ptr<SimulationEngine> sim_engine_;
     std::unique_ptr<StatisticsCollector> stats_collector_;
-
+    std::unique_ptr<evtol::SimulationRunner> sim_runner_;
     ChargerManager charger_manager_;
+    SimulationConfig config_;
 
 public:
-    SimulationRunner()
+    EvtolSimulationApp(int argc, char* argv[])
     {
+        initialize_configuration(argc, argv);
         initialize_simulation();
     }
 
@@ -54,12 +57,22 @@ public:
         cout << "========== eVTOL Aircraft Simulation ==========\n";
         cout << "Fleet Size: " << FLEET_SIZE << " aircraft\n";
         cout << "Chargers Available: " << NUM_CHARGERS << "\n";
-        cout << "Simulation Duration: " << SIMULATION_DURATION_HOURS << " hours\n";
+        cout << "Simulation Duration: " << config_.simulation_duration_hours << " hours\n";
+        cout << "Mode: " << (config_.mode == SimulationMode::FRAME_BASED ? "Frame-Based" : "Event-Driven") << "\n";
+        
+        if (config_.mode == SimulationMode::FRAME_BASED)
+        {
+            cout << "Frame Time: " << config_.frame_time_seconds << " seconds\n";
+            cout << "Threads: " << config_.num_threads << "\n";
+            cout << "Visualization: " << (config_.enable_visualization ? "Enabled" : "Disabled") << "\n";
+            cout << "Speed Multiplier: " << config_.speed_multiplier << "x\n";
+        }
+        
         cout << "Starting simulation...\n\n";
 
         PerformanceTimer<std::chrono::microseconds> timer;
 
-        sim_engine_->run_simulation(charger_manager_, fleet_);
+        sim_runner_->run_simulation(charger_manager_, fleet_);
 
         auto elapsed = timer.elapsed();
 
@@ -70,12 +83,23 @@ public:
     }
 
 private:
+    void initialize_configuration(int argc, char* argv[])
+    {
+        config_.simulation_duration_hours = SIMULATION_DURATION_HOURS;
+        config_.parse_args(argc, argv);
+        config_.load_from_env();
+        
+        if (!config_.validate())
+        {
+            throw std::runtime_error("Invalid configuration");
+        }
+    }
+
     void initialize_simulation()
     {
         fleet_ = AircraftFactory<>::create_fleet(FLEET_SIZE);
         stats_collector_ = std::make_unique<StatisticsCollector>();
-
-        sim_engine_ = std::make_unique<SimulationEngine>(*stats_collector_, SIMULATION_DURATION_HOURS);
+        sim_runner_ = std::make_unique<evtol::SimulationRunner>(*stats_collector_, config_);
     }
 
     void display_results()
@@ -98,11 +122,11 @@ private:
     }
 };
 
-int main()
+int main(int argc, char* argv[])
 {
     try
     {
-        SimulationRunner simulation;
+        EvtolSimulationApp simulation(argc, argv);
         simulation.run_simulation();
 
         return 0;

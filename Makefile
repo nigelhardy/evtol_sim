@@ -8,8 +8,10 @@ TEST_FLAGS = -g -O0 -DDEBUG
 
 # Project configuration
 TARGET = evtolsim
-SOURCE = evtol_sim.cpp
-HEADERS = aircraft.h aircraft_types.h simulation_engine.h charger_manager.h statistics_engine.h
+SOURCES = evtol_sim.cpp aircraft_state.cpp simulation_monitor.cpp simulation_config.cpp frame_based_simulation.cpp
+HEADERS = aircraft.h aircraft_types.h simulation_engine.h charger_manager.h statistics_engine.h \
+          simulation_interface.h simulation_factory.h simulation_config.h aircraft_state.h \
+          simulation_monitor.h frame_based_simulation.h
 
 # Test configuration
 TEST_DIR = tests
@@ -36,8 +38,8 @@ all: debug
 .PHONY: debug
 debug: $(DEBUG_DIR)/$(TARGET)
 
-$(DEBUG_DIR)/$(TARGET): $(SOURCE) $(HEADERS) | $(DEBUG_DIR)
-	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) -o $@ $(SOURCE)
+$(DEBUG_DIR)/$(TARGET): $(SOURCES) $(HEADERS) | $(DEBUG_DIR)
+	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) -o $@ $(SOURCES)
 
 # Test targets
 .PHONY: test
