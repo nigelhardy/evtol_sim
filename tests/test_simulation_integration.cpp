@@ -26,7 +26,7 @@ namespace evtol_test
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
 
         // Create simulation engine
-        evtol::SimulationEngine sim_engine(*stats_collector_, simulation_duration);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, simulation_duration);
 
         // Run complete simulation
         sim_engine.run_simulation(*charger_manager_, fleet);
@@ -62,7 +62,7 @@ namespace evtol_test
             charger_manager_ = std::make_unique<evtol::ChargerManager>();
 
             auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
-            evtol::SimulationEngine sim_engine(*stats_collector_, 2.0);
+            evtol::EventDrivenSimulation sim_engine(*stats_collector_, 2.0);
 
             sim_engine.run_simulation(*charger_manager_, fleet);
 
@@ -96,7 +96,7 @@ namespace evtol_test
             charger_manager_ = std::make_unique<evtol::ChargerManager>();
 
             auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
-            evtol::SimulationEngine sim_engine(*stats_collector_, duration);
+            evtol::EventDrivenSimulation sim_engine(*stats_collector_, duration);
 
             sim_engine.run_simulation(*charger_manager_, fleet);
 
@@ -116,7 +116,7 @@ namespace evtol_test
         const int fleet_size = 25; // 5 of each type
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 4.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 4.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         // Check each aircraft type has recorded activity
@@ -146,7 +146,7 @@ namespace evtol_test
         const int fleet_size = 15; // More aircraft than chargers
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 3.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 3.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         // Chargers should have been well utilized
@@ -165,7 +165,7 @@ namespace evtol_test
         const int fleet_size = 50; // Large fleet increases fault probability
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 3.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 3.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         auto summary = stats_collector_->get_summary_stats();
@@ -186,7 +186,7 @@ namespace evtol_test
 
         auto start_time = std::chrono::high_resolution_clock::now();
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 2.5);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 2.5);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         auto end_time = std::chrono::high_resolution_clock::now();
@@ -207,7 +207,7 @@ namespace evtol_test
 
         // Run first simulation
         auto fleet1 = evtol::AircraftFactory<>::create_fleet(fleet_size);
-        evtol::SimulationEngine sim1(*stats_collector_, sim_duration);
+        evtol::EventDrivenSimulation sim1(*stats_collector_, sim_duration);
         sim1.run_simulation(*charger_manager_, fleet1);
         auto summary1 = stats_collector_->get_summary_stats();
 
@@ -215,7 +215,7 @@ namespace evtol_test
         stats_collector_ = std::make_unique<evtol::StatisticsCollector>();
         charger_manager_ = std::make_unique<evtol::ChargerManager>();
         auto fleet2 = evtol::AircraftFactory<>::create_fleet(fleet_size);
-        evtol::SimulationEngine sim2(*stats_collector_, sim_duration);
+        evtol::EventDrivenSimulation sim2(*stats_collector_, sim_duration);
         sim2.run_simulation(*charger_manager_, fleet2);
         auto summary2 = stats_collector_->get_summary_stats();
 
@@ -235,7 +235,7 @@ namespace evtol_test
             charger_manager_ = std::make_unique<evtol::ChargerManager>();
 
             auto fleet = evtol::AircraftFactory<>::create_fleet(20);
-            evtol::SimulationEngine sim_engine(*stats_collector_, 3.0);
+            evtol::EventDrivenSimulation sim_engine(*stats_collector_, 3.0);
 
             sim_engine.run_simulation(*charger_manager_, fleet);
 
@@ -251,7 +251,7 @@ namespace evtol_test
     TEST_F(SimulationIntegrationTest, ReportGenerationWithRealData)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(15);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 2.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 2.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         std::string report = stats_collector_->generate_report();
@@ -277,7 +277,7 @@ namespace evtol_test
     TEST_F(SimulationIntegrationTest, VeryShortSimulation)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(5);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 0.01); // 36 seconds
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 0.01); // 36 seconds
 
         sim_engine.run_simulation(*charger_manager_, fleet);
 
@@ -296,7 +296,7 @@ namespace evtol_test
     {
         int fleet_size = 10;
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 10000.0); // 10000 hours
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 10000.0); // 10000 hours
 
         auto start_time = std::chrono::high_resolution_clock::now();
         sim_engine.run_simulation(*charger_manager_, fleet);
@@ -316,7 +316,7 @@ namespace evtol_test
     TEST_F(SimulationIntegrationTest, AircraftBehaviorConsistency)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(25);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 2.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 2.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         // Verify aircraft-specific behavior
@@ -340,7 +340,7 @@ namespace evtol_test
         const int stress_fleet_size = 200;
         auto fleet = evtol::AircraftFactory<>::create_fleet(stress_fleet_size);
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 3.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 3.0);
 
         auto start_time = std::chrono::high_resolution_clock::now();
         sim_engine.run_simulation(*charger_manager_, fleet);
@@ -371,7 +371,7 @@ namespace evtol_test
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
         evtol::ChargerManager charger_manager;
         evtol::StatisticsCollector stats_collector;
-        evtol::SimulationEngine sim_engine(stats_collector, simulation_duration);
+        evtol::EventDrivenSimulation sim_engine(stats_collector, simulation_duration);
 
         // Verify initial state
         EXPECT_EQ(fleet.size(), static_cast<size_t>(fleet_size));

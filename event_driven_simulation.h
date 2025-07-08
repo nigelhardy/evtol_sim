@@ -58,7 +58,7 @@ namespace evtol
     using EventData = std::variant<FlightCompleteData, ChargingCompleteData, FaultData>;
     using SimulationEvent = Event<EventData>;
 
-    class SimulationEngine
+    class EventDrivenSimulation
     {
     private:
         std::priority_queue<SimulationEvent> event_queue_;
@@ -70,7 +70,7 @@ namespace evtol
         std::unordered_map<int, double> charging_start_times_;
 
     public:
-        SimulationEngine(StatisticsCollector &stats, double duration_hours = 3.0)
+        EventDrivenSimulation(StatisticsCollector &stats, double duration_hours = 3.0)
             : current_time_hours_(0.0), simulation_duration_hours_(duration_hours),
               stats_collector_(stats)
         {
@@ -100,6 +100,7 @@ namespace evtol
             // Process any remaining activities at simulation end
             finalize_simulation(fleet);
         }
+
         template <typename Fleet>
         void process_event(const SimulationEvent &event, ChargerManager &charger_mgr, Fleet &fleet)
         {
@@ -123,6 +124,9 @@ namespace evtol
                 event_queue_.emplace(type, time_hours, data);
             }
         }
+
+        double get_current_time() const { return current_time_hours_; }
+        double get_duration() const { return simulation_duration_hours_; }
 
     private:
         template <typename Fleet>

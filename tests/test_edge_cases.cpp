@@ -20,7 +20,7 @@ namespace evtol_test
     TEST_F(EdgeCasesTest, ZeroDurationSimulation)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(5);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 0.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 0.0);
 
         sim_engine.run_simulation(*charger_manager_, fleet);
 
@@ -35,7 +35,7 @@ namespace evtol_test
     TEST_F(EdgeCasesTest, NegativeDurationSimulation)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(5);
-        evtol::SimulationEngine sim_engine(*stats_collector_, -1.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, -1.0);
 
         // Should handle negative duration gracefully
         sim_engine.run_simulation(*charger_manager_, fleet);
@@ -48,7 +48,7 @@ namespace evtol_test
     TEST_F(EdgeCasesTest, EmptyFleetWithPositiveDuration)
     {
         std::vector<std::unique_ptr<evtol::AircraftBase>> empty_fleet;
-        evtol::SimulationEngine sim_engine(*stats_collector_, 3.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 3.0);
 
         sim_engine.run_simulation(*charger_manager_, empty_fleet);
 
@@ -71,7 +71,7 @@ namespace evtol_test
         // Mock aircraft returns 0.5 hours by default, let's test edge case handling
         fleet.emplace_back(std::move(mock_aircraft));
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 1.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         auto summary = stats_collector_->get_summary_stats();
@@ -83,7 +83,7 @@ namespace evtol_test
     {
         // Test with many more aircraft than chargers
         auto large_fleet = evtol::AircraftFactory<>::create_fleet(100);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 1.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1.0);
 
         sim_engine.run_simulation(*charger_manager_, large_fleet);
 
@@ -99,7 +99,7 @@ namespace evtol_test
     TEST_F(EdgeCasesTest, VerySmallSimulationDuration)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(10);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 0.0001); // 0.36 seconds
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 0.0001); // 0.36 seconds
 
         sim_engine.run_simulation(*charger_manager_, fleet);
 
@@ -112,7 +112,7 @@ namespace evtol_test
     // TODO: remove? because of faults, this never completes with a ton of flights
     // TEST_F(EdgeCasesTest, ExtremelyLargeSimulationDuration) {
     //     auto fleet = evtol::AircraftFactory<>::create_fleet(5);
-    //     evtol::SimulationEngine sim_engine(*stats_collector_, 1000000.0); // 1 million hours
+    //     evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1000000.0); // 1 million hours
 
     //     auto start_time = std::chrono::high_resolution_clock::now();
     //     sim_engine.run_simulation(*charger_manager_, fleet);
@@ -136,7 +136,7 @@ namespace evtol_test
             alpha_only_fleet.emplace_back(std::make_unique<evtol::AlphaAircraft>(i));
         }
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 2.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 2.0);
         sim_engine.run_simulation(*charger_manager_, alpha_only_fleet);
 
         auto alpha_stats = stats_collector_->get_stats(evtol::AircraftType::ALPHA);
@@ -160,7 +160,7 @@ namespace evtol_test
         // Charlie has high speed and moderate energy consumption
         extreme_fleet.emplace_back(std::make_unique<evtol::CharlieAircraft>(1));
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 2.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 2.0);
         sim_engine.run_simulation(*charger_manager_, extreme_fleet);
 
         auto summary = stats_collector_->get_summary_stats();
@@ -179,7 +179,7 @@ namespace evtol_test
             aircraft->discharge_battery();
         }
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 1.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         // Should handle large charging queue gracefully
@@ -222,7 +222,7 @@ namespace evtol_test
         EXPECT_TRUE(empty_fleet.empty());
 
         // Should work fine in simulation
-        evtol::SimulationEngine sim_engine(*stats_collector_, 1.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1.0);
         sim_engine.run_simulation(*charger_manager_, empty_fleet);
 
         auto summary = stats_collector_->get_summary_stats();
@@ -309,7 +309,7 @@ namespace evtol_test
         fleet.emplace_back(std::make_unique<MockAircraft>(42));
         fleet.emplace_back(std::make_unique<MockAircraft>(42));
 
-        evtol::SimulationEngine sim_engine(*stats_collector_, 1.0);
+        evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1.0);
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         // Should handle duplicate IDs without crashing
@@ -362,13 +362,13 @@ namespace evtol_test
         auto fleet = evtol::AircraftFactory<>::create_fleet(5);
 
         // Test with floating point precision edge cases
-        evtol::SimulationEngine sim1(*stats_collector_, 0.123456789);
+        evtol::EventDrivenSimulation sim1(*stats_collector_, 0.123456789);
         sim1.run_simulation(*charger_manager_, fleet);
 
         stats_collector_ = std::make_unique<evtol::StatisticsCollector>();
         charger_manager_ = std::make_unique<evtol::ChargerManager>();
 
-        evtol::SimulationEngine sim2(*stats_collector_, 1.000000001);
+        evtol::EventDrivenSimulation sim2(*stats_collector_, 1.000000001);
         sim2.run_simulation(*charger_manager_, fleet);
 
         // Both should complete without precision errors

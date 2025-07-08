@@ -36,7 +36,7 @@ namespace evtol_test
 
         evtol::StatisticsCollector stats_collector;
         evtol::ChargerManager charger_manager;
-        evtol::SimulationEngine sim_engine(stats_collector, 3.0);
+        evtol::EventDrivenSimulation sim_engine(stats_collector, 3.0);
 
         PerformanceTestHelper::run_performance_test(
             "Large Fleet Simulation",
@@ -59,7 +59,7 @@ namespace evtol_test
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
         evtol::StatisticsCollector stats_collector;
         evtol::ChargerManager charger_manager;
-        evtol::SimulationEngine sim_engine(stats_collector, long_duration);
+        evtol::EventDrivenSimulation sim_engine(stats_collector, long_duration);
 
         PerformanceTestHelper::run_performance_test(
             "Long Duration Simulation",
@@ -89,7 +89,7 @@ namespace evtol_test
                     auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
                     evtol::StatisticsCollector stats_collector;
                     evtol::ChargerManager charger_manager;
-                    evtol::SimulationEngine sim_engine(stats_collector, 1.0);
+                    evtol::EventDrivenSimulation sim_engine(stats_collector, 1.0);
 
                     sim_engine.run_simulation(charger_manager, fleet);
 
@@ -321,7 +321,7 @@ namespace evtol_test
             auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
             evtol::StatisticsCollector stats_collector;
             evtol::ChargerManager charger_manager;
-            evtol::SimulationEngine sim_engine(stats_collector, 1.0);
+            evtol::EventDrivenSimulation sim_engine(stats_collector, 1.0);
 
             auto start_time = std::chrono::high_resolution_clock::now();
             sim_engine.run_simulation(charger_manager, fleet);
@@ -465,7 +465,7 @@ namespace evtol_test
                 // Set up simulation
                 evtol::StatisticsCollector stats_collector;
                 evtol::ChargerManager charger_manager;
-                evtol::SimulationEngine sim_engine(stats_collector, sim_duration);
+                evtol::EventDrivenSimulation sim_engine(stats_collector, sim_duration);
 
                 // Run simulation
                 sim_engine.run_simulation(charger_manager, fleet);

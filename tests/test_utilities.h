@@ -9,7 +9,7 @@
 
 #include "../aircraft.h"
 #include "../aircraft_types.h"
-#include "../simulation_engine.h"
+#include "../event_driven_simulation.h"
 #include "../charger_manager.h"
 #include "../statistics_engine.h"
 
@@ -234,12 +234,12 @@ namespace evtol_test
         void SetUp() override
         {
             mock_stats_ = std::make_unique<MockStatisticsCollector>();
-            sim_engine_ = std::make_unique<evtol::SimulationEngine>(*mock_stats_, TEST_SIMULATION_DURATION);
+            sim_engine_ = std::make_unique<evtol::EventDrivenSimulation>(*mock_stats_, TEST_SIMULATION_DURATION);
             charger_manager_ = std::make_unique<evtol::ChargerManager>();
         }
 
         std::unique_ptr<MockStatisticsCollector> mock_stats_;
-        std::unique_ptr<evtol::SimulationEngine> sim_engine_;
+        std::unique_ptr<evtol::EventDrivenSimulation> sim_engine_;
         std::unique_ptr<evtol::ChargerManager> charger_manager_;
     };
 

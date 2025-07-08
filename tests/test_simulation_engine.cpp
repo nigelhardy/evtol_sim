@@ -84,7 +84,7 @@ TEST_F(SimulationEngineTest, ChargerAvailabilityDuringSimulation) {
 TEST_F(SimulationEngineTest, SimulationDurationLimits) {
     // Create a simulation with very short duration
     MockStatisticsCollector short_stats;
-    evtol::SimulationEngine short_sim(short_stats, 0.1); // 0.1 hours
+    evtol::EventDrivenSimulation short_sim(short_stats, 0.1); // 0.1 hours
     
     auto fleet = TestDataGenerator::create_test_fleet(3);
     
@@ -150,7 +150,7 @@ TEST_F(SimulationEngineTest, SimulationWithRealAircraftTypes) {
 TEST_F(SimulationEngineTest, EventProcessingOrder) {
     // Create simulation with detailed tracking
     MockStatisticsCollector detailed_stats;
-    evtol::SimulationEngine detailed_sim(detailed_stats, 1.7); // Min simulation duration
+    evtol::EventDrivenSimulation detailed_sim(detailed_stats, 1.7); // Min simulation duration
     
     auto fleet = TestDataGenerator::create_test_fleet(2);
     
@@ -234,7 +234,7 @@ TEST_F(SimulationEngineTest, SimulationTimingAccuracy) {
     // Create simulation with known duration
     MockStatisticsCollector timing_stats;
     const double sim_duration = 2.0; // 2 hours
-    evtol::SimulationEngine timing_sim(timing_stats, sim_duration);
+    evtol::EventDrivenSimulation timing_sim(timing_stats, sim_duration);
     
     auto fleet = TestDataGenerator::create_test_fleet(5);
     
@@ -269,8 +269,8 @@ TEST_F(SimulationEngineTest, SimulationReproducibility) {
     auto fleet2 = TestDataGenerator::create_test_fleet(5);
     
     MockStatisticsCollector stats1, stats2;
-    evtol::SimulationEngine sim1(stats1, TEST_SIMULATION_DURATION);
-    evtol::SimulationEngine sim2(stats2, TEST_SIMULATION_DURATION);
+    evtol::EventDrivenSimulation sim1(stats1, TEST_SIMULATION_DURATION);
+    evtol::EventDrivenSimulation sim2(stats2, TEST_SIMULATION_DURATION);
     
     evtol::ChargerManager charger1, charger2;
     
@@ -328,7 +328,7 @@ TEST_F(SimulationEngineTest, SimulationMemoryUsageWithLargeFleets) {
 TEST_F(SimulationEngineTest, EarlySimulationTermination) {
     // Create simulation with very short duration
     MockStatisticsCollector early_stats;
-    evtol::SimulationEngine early_sim(early_stats, 0.01); // 0.01 hours = 36 seconds
+    evtol::EventDrivenSimulation early_sim(early_stats, 0.01); // 0.01 hours = 36 seconds
     
     auto fleet = TestDataGenerator::create_test_fleet(5);
     
