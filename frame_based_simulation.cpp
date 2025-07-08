@@ -8,7 +8,6 @@ namespace evtol
     FrameBasedSimulationEngine::FrameBasedSimulationEngine(StatisticsCollector &stats, const SimulationConfig& config)
         : SimulationEngineBase(stats, config.simulation_duration_hours)
         , config_(config)
-        , monitor_(nullptr)
         , frame_time_seconds_(config.frame_time_seconds)
     {
         speed_multiplier_.store(config.speed_multiplier);
@@ -55,11 +54,6 @@ namespace evtol
         {
             speed_multiplier_.store(multiplier);
         }
-    }
-
-    void FrameBasedSimulationEngine::set_monitor(std::unique_ptr<ISimulationMonitor> monitor)
-    {
-        monitor_ = std::move(monitor);
     }
 
     void FrameBasedSimulationEngine::run_simulation_impl(ChargerManager &charger_mgr, void *fleet_ptr)

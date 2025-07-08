@@ -19,6 +19,7 @@ namespace evtol
         double total_flight_time_hours = 0.0;
         double total_distance_miles = 0.0;
         double total_charging_time_hours = 0.0;
+        double total_waiting_time_hours = 0.0;
         int total_faults = 0;
         double total_passenger_miles = 0.0;
         int flight_count = 0;
@@ -29,6 +30,7 @@ namespace evtol
             : total_flight_time_hours(other.total_flight_time_hours),
               total_distance_miles(other.total_distance_miles),
               total_charging_time_hours(other.total_charging_time_hours),
+              total_waiting_time_hours(other.total_waiting_time_hours),
               total_faults(other.total_faults),
               total_passenger_miles(other.total_passenger_miles),
               flight_count(other.flight_count),
@@ -41,6 +43,7 @@ namespace evtol
                 total_flight_time_hours = other.total_flight_time_hours;
                 total_distance_miles = other.total_distance_miles;
                 total_charging_time_hours = other.total_charging_time_hours;
+                total_waiting_time_hours = other.total_waiting_time_hours;
                 total_faults = other.total_faults;
                 total_passenger_miles = other.total_passenger_miles;
                 flight_count = other.flight_count;
@@ -63,6 +66,18 @@ namespace evtol
             charge_count++;
         }
 
+        void add_charge_session(double charge_time, double waiting_time)
+        {
+            total_charging_time_hours += charge_time;
+            total_waiting_time_hours += waiting_time;
+            charge_count++;
+        }
+
+        void add_waiting_time(double waiting_time)
+        {
+            total_waiting_time_hours += waiting_time;
+        }
+
         void add_fault()
         {
             total_faults++;
@@ -81,6 +96,21 @@ namespace evtol
         double avg_charging_time() const
         {
             return charge_count > 0 ? total_charging_time_hours / charge_count : 0.0;
+        }
+
+        double avg_waiting_time() const
+        {
+            return charge_count > 0 ? total_waiting_time_hours / charge_count : 0.0;
+        }
+
+        double avg_total_charge_time() const
+        {
+            return charge_count > 0 ? (total_charging_time_hours + total_waiting_time_hours) / charge_count : 0.0;
+        }
+
+        double total_charge_time_including_waiting() const
+        {
+            return total_charging_time_hours + total_waiting_time_hours;
         }
     };
     struct AircraftSpec

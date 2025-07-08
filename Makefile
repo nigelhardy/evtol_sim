@@ -8,10 +8,10 @@ TEST_FLAGS = -g -O0 -DDEBUG
 
 # Project configuration
 TARGET = evtolsim
-SOURCES = evtol_sim.cpp aircraft_state.cpp simulation_monitor.cpp simulation_config.cpp frame_based_simulation.cpp
+SOURCES = evtol_sim.cpp aircraft_state.cpp simulation_config.cpp frame_based_simulation.cpp
 HEADERS = aircraft.h aircraft_types.h simulation_engine.h charger_manager.h statistics_engine.h \
           simulation_interface.h simulation_factory.h simulation_config.h aircraft_state.h \
-          simulation_monitor.h frame_based_simulation.h
+          frame_based_simulation.h
 
 # Test configuration
 TEST_DIR = tests

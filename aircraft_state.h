@@ -27,6 +27,8 @@ namespace evtol
         std::atomic<double> current_flight_distance{0.0}; // Current flight distance
         std::atomic<bool> fault_occurred{false};
         std::atomic<int> charger_id{-1};                // ID of assigned charger (-1 if none)
+        std::atomic<double> waiting_start_time{0.0};    // Time when waiting started
+        std::atomic<double> accumulated_waiting_time{0.0}; // Total waiting time for current charge cycle
         
         // Thread-safe state transitions
         mutable std::mutex state_mutex;
@@ -44,6 +46,8 @@ namespace evtol
             , current_flight_distance(other.current_flight_distance.load())
             , fault_occurred(other.fault_occurred.load())
             , charger_id(other.charger_id.load())
+            , waiting_start_time(other.waiting_start_time.load())
+            , accumulated_waiting_time(other.accumulated_waiting_time.load())
         {
         }
         
@@ -56,6 +60,8 @@ namespace evtol
                 current_flight_distance.store(other.current_flight_distance.load());
                 fault_occurred.store(other.fault_occurred.load());
                 charger_id.store(other.charger_id.load());
+                waiting_start_time.store(other.waiting_start_time.load());
+                accumulated_waiting_time.store(other.accumulated_waiting_time.load());
             }
             return *this;
         }

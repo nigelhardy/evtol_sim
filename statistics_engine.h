@@ -16,6 +16,7 @@ namespace evtol
         double total_flight_time = 0.0;
         double total_distance = 0.0;
         double total_charging_time = 0.0;
+        double total_waiting_time = 0.0;
         int total_faults = 0;
         double total_passenger_miles = 0.0;
         int total_flights = 0;
@@ -92,6 +93,16 @@ namespace evtol
             stats_[type].add_charge_session(charge_time);
         }
 
+        virtual void record_charge_session(AircraftType type, double charge_time, double waiting_time)
+        {
+            stats_[type].add_charge_session(charge_time, waiting_time);
+        }
+
+        virtual void record_waiting_time(AircraftType type, double waiting_time)
+        {
+            stats_[type].add_waiting_time(waiting_time);
+        }
+
         template <typename... MetricArgs>
         void record_charge_session(AircraftType type, double charge_time, MetricArgs &&...args)
         {
@@ -163,6 +174,8 @@ namespace evtol
                 oss << "  Average Flight Time: " << stats.avg_flight_time() << " hours\n";
                 oss << "  Average Distance: " << stats.avg_distance() << " miles\n";
                 oss << "  Average Charging Time: " << stats.avg_charging_time() << " hours\n";
+                oss << "  Average Waiting Time: " << stats.avg_waiting_time() << " hours\n";
+                oss << "  Average Total Charge Time (including waiting): " << stats.avg_total_charge_time() << " hours\n";
                 oss << "  Total Faults: " << stats.total_faults << "\n";
                 oss << "  Total Passenger Miles: " << stats.total_passenger_miles << "\n";
                 oss << "  Total Flights: " << stats.flight_count << "\n";
@@ -181,6 +194,7 @@ namespace evtol
                 summary.total_flight_time += stats.total_flight_time_hours;
                 summary.total_distance += stats.total_distance_miles;
                 summary.total_charging_time += stats.total_charging_time_hours;
+                summary.total_waiting_time += stats.total_waiting_time_hours;
                 summary.total_faults += stats.total_faults;
                 summary.total_passenger_miles += stats.total_passenger_miles;
                 summary.total_flights += stats.flight_count;

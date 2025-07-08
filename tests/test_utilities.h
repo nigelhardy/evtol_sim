@@ -35,6 +35,7 @@ namespace evtol_test
         std::string manufacturer_;
         evtol::AircraftSpec spec_;
         bool should_fault_;
+        bool is_faulty_;
 
     public:
         MockAircraft(int id, evtol::AircraftType type = evtol::AircraftType::ALPHA,
@@ -46,7 +47,12 @@ namespace evtol_test
 
         double get_flight_time_hours() const override { return 0.5; }
         double get_flight_distance_miles() const override { return 50.0; }
-        bool check_fault_during_flight(double /*flight_time_hours*/) override { return should_fault_; }
+        double check_fault_during_flight(double /*flight_time_hours*/) override
+        {
+            // -1 means no fault, anything over 0.0 will be a fault
+            // using .1 for fault arbitrarily to be short and less than flight time
+            return should_fault_ ? 0.1 : -1;
+        }
         void discharge_battery() override { battery_level_ = 0.0; }
         void charge_battery() override { battery_level_ = 1.0; }
         double get_battery_level() const override { return battery_level_; }
@@ -56,6 +62,8 @@ namespace evtol_test
         const evtol::AircraftSpec &get_spec() const override { return spec_; }
         int get_passenger_count() const override { return 2; }
         double get_charge_time_hours() const override { return 0.5; }
+        bool is_faulty() const override { return is_faulty_; }
+        void set_faulty(bool faulty) override { is_faulty_ = faulty; }
 
         // Test utilities
         void set_battery_level(double level) { battery_level_ = level; }
@@ -219,7 +227,7 @@ namespace evtol_test
 
         std::unique_ptr<evtol::StatisticsCollector> stats_collector_;
     };
-
+    // TODO Do we want these setup functions in test utilities? Or in the test themselves??
     class SimulationEngineTest : public ::testing::Test
     {
     protected:

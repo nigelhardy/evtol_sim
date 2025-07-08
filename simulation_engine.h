@@ -5,6 +5,7 @@
 #include <chrono>
 #include <variant>
 #include <iostream>
+#include <unordered_map>
 
 #include "charger_manager.h"
 #include "statistics_engine.h"
@@ -45,6 +46,7 @@ namespace evtol
     {
         int aircraft_id;
         double charge_time;
+        double waiting_time;
     };
 
     struct FaultData
@@ -63,6 +65,7 @@ namespace evtol
         double current_time_hours_;
         double simulation_duration_hours_;
         StatisticsCollector &stats_collector_;
+        std::unordered_map<int, double> waiting_start_times_;
 
     public:
         SimulationEngine(StatisticsCollector &stats, double duration_hours = 3.0)
@@ -171,11 +174,12 @@ namespace evtol
                 {
                     if (charger_mgr.request_charger(aircraft->get_id()))
                     {
-                        schedule_charging(aircraft.get());
+                        schedule_charging(aircraft.get(), 0.0);
                     }
                     else
                     {
                         charger_mgr.add_to_queue(aircraft->get_id());
+                        waiting_start_times_[aircraft->get_id()] = current_time_hours_;
                     }
                 }
             }
@@ -194,7 +198,7 @@ namespace evtol
 
                 aircraft->charge_battery();
 
-                stats_collector_.record_charge_session(aircraft->get_type(), data.charge_time);
+                stats_collector_.record_charge_session(aircraft->get_type(), data.charge_time, data.waiting_time);
 
                 if (current_time_hours_ < simulation_duration_hours_ && !aircraft->is_faulty())
                 {
@@ -218,7 +222,16 @@ namespace evtol
                     if (next_aircraft_it != fleet.end())
                     {
                         charger_mgr.assign_charger(next_aircraft_id);
-                        schedule_charging(next_aircraft_it->get());
+                        
+                        double waiting_time = 0.0;
+                        auto waiting_it = waiting_start_times_.find(next_aircraft_id);
+                        if (waiting_it != waiting_start_times_.end())
+                        {
+                            waiting_time = current_time_hours_ - waiting_it->second;
+                            waiting_start_times_.erase(waiting_it);
+                        }
+                        
+                        schedule_charging(next_aircraft_it->get(), waiting_time);
                     }
                 }
             }
@@ -235,21 +248,19 @@ namespace evtol
             {
                 auto &aircraft = *aircraft_it;
                 aircraft->set_faulty(true);
-                std::cout << "FAULT: " << aircraft->get_manufacturer() << " aircraft (ID: " 
-                          << data.aircraft_id << ") fault at time " << data.fault_time 
-                          << " hours" << std::endl;
                 stats_collector_.record_fault(aircraft->get_type());
             }
         }
 
         template <typename Aircraft>
-        void schedule_charging(Aircraft *aircraft)
+        void schedule_charging(Aircraft *aircraft, double waiting_time)
         {
             double charge_time = aircraft->get_charge_time_hours();
 
             ChargingCompleteData charge_data{
                 aircraft->get_id(),
-                charge_time};
+                charge_time,
+                waiting_time};
 
             schedule_event(EventType::CHARGING_COMPLETE,
                            current_time_hours_ + charge_time,

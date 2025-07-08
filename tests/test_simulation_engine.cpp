@@ -30,6 +30,7 @@ TEST_F(SimulationEngineTest, SingleAircraftSimulation) {
     
     // Check using the base StatisticsCollector's summary stats
     auto summary = mock_stats_->get_summary_stats();
+    std::cout << mock_stats_->generate_report() << std::endl;
     EXPECT_GT(summary.total_flights, 0);
     EXPECT_GE(summary.total_charges, 1);  // Should have at least 1 complete charge cycle
 }

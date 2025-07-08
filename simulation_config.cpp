@@ -34,26 +34,6 @@ namespace evtol
             {
                 speed_multiplier = std::stod(argv[++i]);
             }
-            else if (strcmp(argv[i], "--visualization") == 0)
-            {
-                enable_visualization = true;
-            }
-            else if (strcmp(argv[i], "--no-visualization") == 0)
-            {
-                enable_visualization = false;
-            }
-            else if (strcmp(argv[i], "--real-time") == 0)
-            {
-                enable_real_time = true;
-            }
-            else if (strcmp(argv[i], "--no-real-time") == 0)
-            {
-                enable_real_time = false;
-            }
-            else if (strcmp(argv[i], "--pause-on-fault") == 0)
-            {
-                pause_on_fault = true;
-            }
             else if (strcmp(argv[i], "--no-multithreading") == 0)
             {
                 enable_multithreading = false;
@@ -71,11 +51,6 @@ namespace evtol
                 std::cout << "  --frame-time <seconds>     Frame time in seconds (default: 60.0)" << std::endl;
                 std::cout << "  --threads <count>          Number of threads (default: auto)" << std::endl;
                 std::cout << "  --speed <multiplier>       Speed multiplier (default: 1.0)" << std::endl;
-                std::cout << "  --visualization            Enable visualization" << std::endl;
-                std::cout << "  --no-visualization         Disable visualization" << std::endl;
-                std::cout << "  --real-time                Enable real-time simulation" << std::endl;
-                std::cout << "  --no-real-time             Disable real-time simulation" << std::endl;
-                std::cout << "  --pause-on-fault           Pause simulation on fault" << std::endl;
                 std::cout << "  --no-multithreading        Disable multithreading" << std::endl;
                 std::cout << "  --detailed-logging         Enable detailed logging" << std::endl;
                 std::cout << "  --help                     Show this help message" << std::endl;

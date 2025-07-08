@@ -64,7 +64,6 @@ public:
         {
             cout << "Frame Time: " << config_.frame_time_seconds << " seconds\n";
             cout << "Threads: " << config_.num_threads << "\n";
-            cout << "Visualization: " << (config_.enable_visualization ? "Enabled" : "Disabled") << "\n";
             cout << "Speed Multiplier: " << config_.speed_multiplier << "x\n";
         }
         

@@ -296,7 +296,7 @@ namespace evtol_test
     {
         int fleet_size = 10;
         auto fleet = evtol::AircraftFactory<>::create_fleet(fleet_size);
-        evtol::SimulationEngine sim_engine(*stats_collector_, 1000.0); // 1000 hours
+        evtol::SimulationEngine sim_engine(*stats_collector_, 10000.0); // 10000 hours
 
         auto start_time = std::chrono::high_resolution_clock::now();
         sim_engine.run_simulation(*charger_manager_, fleet);
