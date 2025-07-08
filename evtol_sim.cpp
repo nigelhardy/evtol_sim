@@ -46,7 +46,7 @@ private:
     SimulationConfig config_;
 
 public:
-    EvtolSimulationApp(int argc, char* argv[])
+    EvtolSimulationApp(int argc, char *argv[])
     {
         initialize_configuration(argc, argv);
         initialize_simulation();
@@ -59,13 +59,13 @@ public:
         cout << "Chargers Available: " << NUM_CHARGERS << "\n";
         cout << "Simulation Duration: " << config_.simulation_duration_hours << " hours\n";
         cout << "Mode: " << (config_.mode == SimulationMode::FRAME_BASED ? "Frame-Based" : "Event-Driven") << "\n";
-        
+
         if (config_.mode == SimulationMode::FRAME_BASED)
         {
             cout << "Frame Time: " << config_.frame_time_seconds << " seconds\n";
             cout << "Threads: " << config_.num_threads << "\n";
         }
-        
+
         cout << "Starting simulation...\n\n";
 
         PerformanceTimer<std::chrono::microseconds> timer;
@@ -74,20 +74,20 @@ public:
 
         auto elapsed = timer.elapsed();
 
-        cout << "Simulation completed in " << elapsed.count() << " microseconds (" 
+        cout << "Simulation completed in " << elapsed.count() << " microseconds ("
              << std::fixed << std::setprecision(3) << elapsed.count() / 1000.0 << " ms)\n\n";
 
         display_results();
     }
 
 private:
-    void initialize_configuration(int argc, char* argv[])
+    void initialize_configuration(int argc, char *argv[])
     {
         // use default 3.0 duration as specified in problem statement
         config_.simulation_duration_hours = SIMULATION_DURATION_HOURS;
         config_.parse_args(argc, argv);
         config_.load_from_env();
-        
+
         if (!config_.validate())
         {
             throw std::runtime_error("Invalid configuration");
@@ -98,10 +98,10 @@ private:
     {
         fleet_ = AircraftFactory<>::create_fleet(FLEET_SIZE);
         stats_collector_ = std::make_unique<StatisticsCollector>();
-        
+
         // Set aircraft counts for proper reporting
         stats_collector_->set_aircraft_counts(fleet_);
-        
+
         sim_runner_ = std::make_unique<evtol::SimulationRunner>(*stats_collector_, config_);
     }
 
@@ -125,7 +125,7 @@ private:
     }
 };
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     try
     {
