@@ -1,6 +1,4 @@
 #pragma once
-#include <atomic>
-#include <mutex>
 
 namespace evtol
 {
@@ -21,42 +19,21 @@ namespace evtol
      */
     struct AircraftFrameData
     {
-        // TODO no longer multi-threaded, so not necessary here
-        std::atomic<AircraftState> state{AircraftState::IDLE};
-        std::atomic<double> time_remaining_sec{0.0};      // Time left in current activity
-        std::atomic<double> current_flight_time_hrs{0.0}; // Current flight duration
-        std::atomic<double> current_flight_distance{0.0}; // Current flight distance
-        std::atomic<bool> fault_occurred{false};
-        std::atomic<int> charger_id{-1};                       // ID of assigned charger (-1 if none)
-        std::atomic<double> waiting_start_time{0.0};           // Time when waiting started
-        std::atomic<double> accumulated_waiting_time_sec{0.0}; // Total waiting time for current charge cycle
+        AircraftState state{AircraftState::IDLE};
+        double time_remaining_sec{0.0};      // Time left in current activity
+        double current_flight_time_hrs{0.0}; // Current flight duration
+        double current_flight_distance{0.0}; // Current flight distance
+        bool fault_occurred{false};
+        int charger_id{-1};                       // ID of assigned charger (-1 if none)
+        double waiting_start_time{0.0};           // Time when waiting started
+        double accumulated_waiting_time_sec{0.0}; // Total waiting time for current charge cycle
 
-        // Delete copy constructor and assignment operator
-        AircraftFrameData(const AircraftFrameData &) = delete;
-        AircraftFrameData &operator=(const AircraftFrameData &) = delete;
-
-        // Default constructor and move operations
+        // Use default copy/move semantics for single-threaded operation
         AircraftFrameData() = default;
-        AircraftFrameData(AircraftFrameData &&other) noexcept
-            : state(other.state.load()), time_remaining_sec(other.time_remaining_sec.load()), current_flight_time_hrs(other.current_flight_time_hrs.load()), current_flight_distance(other.current_flight_distance.load()), fault_occurred(other.fault_occurred.load()), charger_id(other.charger_id.load()), waiting_start_time(other.waiting_start_time.load()), accumulated_waiting_time_sec(other.accumulated_waiting_time_sec.load())
-        {
-        }
-
-        AircraftFrameData &operator=(AircraftFrameData &&other) noexcept
-        {
-            if (this != &other)
-            {
-                state.store(other.state.load());
-                time_remaining_sec.store(other.time_remaining_sec.load());
-                current_flight_time_hrs.store(other.current_flight_time_hrs.load());
-                current_flight_distance.store(other.current_flight_distance.load());
-                fault_occurred.store(other.fault_occurred.load());
-                charger_id.store(other.charger_id.load());
-                waiting_start_time.store(other.waiting_start_time.load());
-                accumulated_waiting_time_sec.store(other.accumulated_waiting_time_sec.load());
-            }
-            return *this;
-        }
+        AircraftFrameData(const AircraftFrameData &) = default;
+        AircraftFrameData &operator=(const AircraftFrameData &) = default;
+        AircraftFrameData(AircraftFrameData &&) = default;
+        AircraftFrameData &operator=(AircraftFrameData &&) = default;
 
         /**
          * Safely transition to a new state
@@ -66,13 +43,13 @@ namespace evtol
         bool transition_to(AircraftState new_state);
 
         /**
-         * Get current state safely
+         * Get current state
          * @return Current state
          */
         AircraftState get_state() const;
 
         /**
-         * Update time remaining atomically
+         * Update time remaining
          * @param delta_time Time to subtract from remaining time
          * @return New time remaining
          */

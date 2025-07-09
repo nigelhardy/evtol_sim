@@ -14,10 +14,8 @@ namespace evtol
         
         // Frame-based specific settings
         double frame_time_seconds = 60.0;  // 1 minute frames
-        int num_threads = static_cast<int>(std::thread::hardware_concurrency());
         
         // Performance settings
-        bool enable_multithreading = true;
         bool enable_detailed_logging = false;
         bool enable_partial_flights = true;
         

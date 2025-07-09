@@ -6,7 +6,7 @@ namespace evtol
 {
     bool AircraftFrameData::transition_to(AircraftState new_state)
     {        
-        AircraftState current_state = state.load();
+        AircraftState current_state = state;
         
         if (!AircraftStateMachine::is_valid_transition(current_state, new_state))
         {
@@ -14,33 +14,33 @@ namespace evtol
             return false;
         }
         
-        state.store(new_state);
+        state = new_state;
         return true;
     }
 
     AircraftState AircraftFrameData::get_state() const
     {
-        return state.load();
+        return state;
     }
 
     double AircraftFrameData::update_time_remaining(double delta_time_sec)
     {
-        double current_time_left_sec = time_remaining_sec.load();
+        double current_time_left_sec = time_remaining_sec;
         double new_time = std::max(0.0, current_time_left_sec - delta_time_sec);
-        time_remaining_sec.store(new_time);
+        time_remaining_sec = new_time;
         return new_time;
     }
 
     void AircraftFrameData::reset_for_activity(AircraftState new_state, double duration_sec)
     {        
-        state.store(new_state);
-        time_remaining_sec.store(duration_sec);
-        fault_occurred.store(false);
+        state = new_state;
+        time_remaining_sec = duration_sec;
+        fault_occurred = false;
         
         if (new_state == AircraftState::FLYING)
         {
             // Reset flight-specific data
-            current_flight_time_hrs.store(duration_sec / 3600.0);  // Convert seconds to hours
+            current_flight_time_hrs = duration_sec / 3600.0;  // Convert seconds to hours
             // Note: current_flight_distance will be set by calling code after reset
         }
     }

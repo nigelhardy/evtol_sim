@@ -6,7 +6,7 @@
 
 namespace evtol
 {
-    void SimulationConfig::parse_args(int argc, char* argv[])
+    void SimulationConfig::parse_args(int argc, char *argv[])
     {
         for (int i = 1; i < argc; ++i)
         {
@@ -26,14 +26,6 @@ namespace evtol
             {
                 frame_time_seconds = std::stod(argv[++i]);
             }
-            else if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc)
-            {
-                num_threads = std::stoi(argv[++i]);
-            }
-            else if (strcmp(argv[i], "--no-multithreading") == 0)
-            {
-                enable_multithreading = false;
-            }
             else if (strcmp(argv[i], "--detailed-logging") == 0)
             {
                 enable_detailed_logging = true;
@@ -49,8 +41,6 @@ namespace evtol
                 std::cout << "  --event-driven             Use event-driven simulation (default)" << std::endl;
                 std::cout << "  --duration <hours>         Simulation duration in hours (default: 3.0)" << std::endl;
                 std::cout << "  --frame-time <seconds>     Frame time in seconds (default: 60.0)" << std::endl;
-                std::cout << "  --threads <count>          Number of threads (default: auto)" << std::endl;
-                std::cout << "  --no-multithreading        Disable multithreading" << std::endl;
                 std::cout << "  --detailed-logging         Enable detailed logging" << std::endl;
                 std::cout << "  --no-partial-flights       Disable partial flights/charging at simulation end" << std::endl;
                 std::cout << "  --help                     Show this help message" << std::endl;
@@ -72,32 +62,20 @@ namespace evtol
             std::cerr << "Error: Simulation duration must be positive" << std::endl;
             return false;
         }
-        
+
         if (frame_time_seconds <= 0.0)
         {
             std::cerr << "Error: Frame time must be positive" << std::endl;
             return false;
         }
-        
-        if (num_threads <= 0)
-        {
-            std::cerr << "Error: Number of threads must be positive" << std::endl;
-            return false;
-        }
-        
+
         // Warn about potentially problematic settings
-        if (frame_time_seconds > 300.0)  // 5 minutes
+        if (frame_time_seconds > 300.0) // 5 minutes
         {
-            std::cerr << "Warning: Frame time is quite large (" << frame_time_seconds 
+            std::cerr << "Warning: Frame time is quite large (" << frame_time_seconds
                       << " seconds). This may reduce simulation accuracy." << std::endl;
         }
-        
-        if (mode == SimulationMode::FRAME_BASED && num_threads > 32)
-        {
-            std::cerr << "Warning: Large number of threads (" << num_threads 
-                      << ") may not improve performance." << std::endl;
-        }
-        
+
         return true;
     }
 }

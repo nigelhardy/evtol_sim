@@ -62,7 +62,6 @@ public:
         if (config_.mode == SimulationMode::FRAME_BASED)
         {
             cout << "Frame Time: " << config_.frame_time_seconds << " seconds\n";
-            cout << "Threads: " << config_.num_threads << "\n";
         }
 
         cout << "Starting simulation...\n\n";
