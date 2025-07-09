@@ -7,6 +7,10 @@ Includes simple charging infrastructure, per vehicle characteristics, and basic 
 
 The simulation models a fleet of 20 eVTOL aircraft with 5 different aircraft types, 3 charging stations, and defaults to a 3.0 hour duration.
 
+Assumptions: 
+1. When a fault occurs, the flight is able to complete then the aircraft is grounded.
+   - For event based simulation, it is okay to calculate chance of fault before flight is complete
+
 ## Basic Features
 - Two simulation modes: Event-driven and Frame-based
 - 5 aircraft types with unique attributes
