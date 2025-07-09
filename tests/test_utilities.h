@@ -7,11 +7,11 @@
 #include <chrono>
 #include <thread>
 
-#include "../aircraft.h"
-#include "../aircraft_types.h"
-#include "../event_driven_simulation.h"
-#include "../charger_manager.h"
-#include "../statistics_engine.h"
+#include "aircraft.h"
+#include "aircraft_types.h"
+#include "event_driven_simulation.h"
+#include "charger_manager.h"
+#include "statistics_engine.h"
 
 namespace evtol_test
 {

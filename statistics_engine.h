@@ -137,6 +137,7 @@ namespace evtol
             stats_[type].add_partial_charge(charge_time);
         }
 
+        // Experimenting with fancy templates, but not utilized
         template <typename Metric, typename... Rest>
         void record_additional_metrics(AircraftType type, Metric &&metric, Rest &&...rest)
         {

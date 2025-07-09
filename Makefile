@@ -20,7 +20,7 @@ HEADERS = aircraft.h aircraft_types.h charger_manager.h statistics_engine.h \
 TEST_DIR = tests
 TEST_BUILD_DIR = $(BUILD_DIR)/test
 TEST_TARGET = evtol_tests
-TEST_SOURCES = $(wildcard $(TEST_DIR)/**/*.cpp $(TEST_DIR)/*.cpp)
+TEST_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
 TEST_OBJECTS = $(TEST_SOURCES:%.cpp=$(TEST_BUILD_DIR)/%.o)
 
 # Google Test configuration

@@ -17,14 +17,11 @@ namespace evtol
 
     void FrameBasedSimulationEngine::run_simulation_impl(ChargerManager &charger_mgr, void *fleet_ptr)
     {
-        // Type-erase back to template - cast to the expected fleet type
+        // A bit ugly, but works - Type-erase back to template - cast to the expected fleet type
         auto *fleet = static_cast<std::vector<std::unique_ptr<AircraftBase>> *>(fleet_ptr);
         run_frame_based_simulation(charger_mgr, *fleet);
     }
 
-    // Need to check the existing charger manager interface to make sure these methods exist
-    // For now, I'll implement placeholder methods that would need to be added to ChargerManager
-    // TODO check this one is good
     void FrameBasedSimulationEngine::handle_partial_flight(std::unique_ptr<AircraftBase> &aircraft, AircraftFrameData &frame_data)
     {
         // Calculate how much of the flight was completed
@@ -45,7 +42,6 @@ namespace evtol
         // Record partial flight statistics
         stats_collector_.record_partial_flight(aircraft->get_type(), completed_flight_time, partial_distance, aircraft->get_passenger_count());
     }
-    // TODO check this
     void FrameBasedSimulationEngine::handle_partial_charging(std::unique_ptr<AircraftBase> &aircraft, AircraftFrameData &frame_data)
     {
         // Calculate how much charging was completed
