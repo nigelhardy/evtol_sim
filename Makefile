@@ -2,9 +2,9 @@
 
 # Compiler configuration
 CXX = clang++
-CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wconversion -Wshadow
+CXXFLAGS = -std=c++14 -Wall -Wextra -Wpedantic -Wconversion -Wshadow
 DEBUG_FLAGS = -g -O0 -DDEBUG -fsanitize=address -fsanitize=undefined
-TEST_FLAGS = -g -O0 -DDEBUG
+TEST_CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wconversion -Wshadow -g -O0 -DDEBUG
 
 # Project configuration
 TARGET = evtolsim
@@ -53,12 +53,12 @@ test: test-build
 test-build: $(TEST_BUILD_DIR)/$(TEST_TARGET)
 
 $(TEST_BUILD_DIR)/$(TEST_TARGET): $(TEST_OBJECTS) | $(TEST_BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(TEST_FLAGS) -o $@ $(TEST_OBJECTS) $(GTEST_FLAGS)
+	$(CXX) $(TEST_CXXFLAGS) -o $@ $(TEST_OBJECTS) $(GTEST_FLAGS)
 
 # Test object compilation
 $(TEST_BUILD_DIR)/%.o: %.cpp $(HEADERS) | $(TEST_BUILD_DIR)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(TEST_FLAGS) $(GTEST_INCLUDE) -I. -c $< -o $@
+	$(CXX) $(TEST_CXXFLAGS) $(GTEST_INCLUDE) -I. -c $< -o $@
 
 # Individual test targets
 .PHONY: test-core

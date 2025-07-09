@@ -232,8 +232,9 @@ namespace evtol_test
             });
 
         EXPECT_EQ(filtered.size(), 1);
-        EXPECT_EQ(filtered[0].first, evtol::AircraftType::CHARLIE);
-        EXPECT_EQ(filtered[0].second.total_faults, 2);
+        auto [type1, stats1] = filtered[0];
+        EXPECT_EQ(type1, evtol::AircraftType::CHARLIE);
+        EXPECT_EQ(stats1.total_faults, 2);
 
         // Filter for aircraft types with flight time > 2.5 hours
         auto filtered2 = stats_collector_->get_filtered_stats(
@@ -243,8 +244,9 @@ namespace evtol_test
             });
 
         EXPECT_EQ(filtered2.size(), 1);
-        EXPECT_EQ(filtered2[0].first, evtol::AircraftType::CHARLIE);
-        EXPECT_NEAR_TOLERANCE(filtered2[0].second.total_flight_time_hours, 3.0);
+        auto [type2, stats2] = filtered2[0];
+        EXPECT_EQ(type2, evtol::AircraftType::CHARLIE);
+        EXPECT_NEAR_TOLERANCE(stats2.total_flight_time_hours, 3.0);
     }
 
     // Test aggregate stats functionality

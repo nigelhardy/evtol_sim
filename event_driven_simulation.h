@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 #include <chrono>
-#include <variant>
 #include <iostream>
 #include <unordered_map>
 
@@ -56,7 +55,51 @@ namespace evtol
         double fault_time;
     };
 
-    using EventData = std::variant<FlightCompleteData, ChargingCompleteData, FaultData>;
+    // C++14 compatible union-based event data
+    struct EventData {
+        EventType type;
+        union {
+            FlightCompleteData flight_data;
+            ChargingCompleteData charge_data;
+            FaultData fault_data;
+        };
+        
+        EventData(const FlightCompleteData& data) : type(EventType::FLIGHT_COMPLETE), flight_data(data) {}
+        EventData(const ChargingCompleteData& data) : type(EventType::CHARGING_COMPLETE), charge_data(data) {}
+        EventData(const FaultData& data) : type(EventType::FAULT_OCCURRED), fault_data(data) {}
+        
+        EventData(const EventData& other) : type(other.type) {
+            switch (type) {
+                case EventType::FLIGHT_COMPLETE:
+                    flight_data = other.flight_data;
+                    break;
+                case EventType::CHARGING_COMPLETE:
+                    charge_data = other.charge_data;
+                    break;
+                case EventType::FAULT_OCCURRED:
+                    fault_data = other.fault_data;
+                    break;
+            }
+        }
+        
+        EventData& operator=(const EventData& other) {
+            if (this != &other) {
+                type = other.type;
+                switch (type) {
+                    case EventType::FLIGHT_COMPLETE:
+                        flight_data = other.flight_data;
+                        break;
+                    case EventType::CHARGING_COMPLETE:
+                        charge_data = other.charge_data;
+                        break;
+                    case EventType::FAULT_OCCURRED:
+                        fault_data = other.fault_data;
+                        break;
+                }
+            }
+            return *this;
+        }
+    };
     using SimulationEvent = Event<EventData>;
 
     class EventDrivenSimulation
@@ -129,20 +172,20 @@ namespace evtol
         template <typename Fleet>
         void process_event(const SimulationEvent &event, ChargerManager &charger_mgr, Fleet &fleet)
         {
-            std::visit([&](const auto &data)
-                       {
-            using T = std::decay_t<decltype(data)>;
-            
-            if constexpr (std::is_same_v<T, FlightCompleteData>) {
-                log_event("Processing FLIGHT_COMPLETE event for aircraft " + std::to_string(data.aircraft_id));
-                handle_flight_complete(data, charger_mgr, fleet);
-            } else if constexpr (std::is_same_v<T, ChargingCompleteData>) {
-                log_event("Processing CHARGING_COMPLETE event for aircraft " + std::to_string(data.aircraft_id));
-                handle_charging_complete(data, charger_mgr, fleet);
-            } else if constexpr (std::is_same_v<T, FaultData>) {
-                log_event("Processing FAULT_OCCURRED event for aircraft " + std::to_string(data.aircraft_id));
-                handle_fault(data, fleet);
-            } }, event.data);
+            switch (event.data.type) {
+                case EventType::FLIGHT_COMPLETE:
+                    log_event("Processing FLIGHT_COMPLETE event for aircraft " + std::to_string(event.data.flight_data.aircraft_id));
+                    handle_flight_complete(event.data.flight_data, charger_mgr, fleet);
+                    break;
+                case EventType::CHARGING_COMPLETE:
+                    log_event("Processing CHARGING_COMPLETE event for aircraft " + std::to_string(event.data.charge_data.aircraft_id));
+                    handle_charging_complete(event.data.charge_data, charger_mgr, fleet);
+                    break;
+                case EventType::FAULT_OCCURRED:
+                    log_event("Processing FAULT_OCCURRED event for aircraft " + std::to_string(event.data.fault_data.aircraft_id));
+                    handle_fault(event.data.fault_data, fleet);
+                    break;
+            }
         }
 
         void schedule_event(EventType type, double time_hours, EventData data)
@@ -176,17 +219,18 @@ namespace evtol
                     case EventType::FAULT_OCCURRED: event_type_str = "FAULT_OCCURRED"; break;
                 }
                 
-                int aircraft_id = std::visit([](const auto &data) -> int {
-                    using T = std::decay_t<decltype(data)>;
-                    if constexpr (std::is_same_v<T, FlightCompleteData>) {
-                        return data.aircraft_id;
-                    } else if constexpr (std::is_same_v<T, ChargingCompleteData>) {
-                        return data.aircraft_id;
-                    } else if constexpr (std::is_same_v<T, FaultData>) {
-                        return data.aircraft_id;
-                    }
-                    return -1;
-                }, data);
+                int aircraft_id = -1;
+                switch (data.type) {
+                    case EventType::FLIGHT_COMPLETE:
+                        aircraft_id = data.flight_data.aircraft_id;
+                        break;
+                    case EventType::CHARGING_COMPLETE:
+                        aircraft_id = data.charge_data.aircraft_id;
+                        break;
+                    case EventType::FAULT_OCCURRED:
+                        aircraft_id = data.fault_data.aircraft_id;
+                        break;
+                }
                 
                 if (is_partial_event)
                 {
@@ -237,7 +281,7 @@ namespace evtol
                 FaultData fault_data{
                     aircraft->get_id(),
                     fault_time};
-                schedule_event(EventType::FAULT_OCCURRED, current_time_hours_ + fault_time, fault_data);
+                schedule_event(EventType::FAULT_OCCURRED, current_time_hours_ + fault_time, EventData(fault_data));
             }
 
             FlightCompleteData flight_data{
@@ -246,7 +290,7 @@ namespace evtol
                 distance,
                 fault_occurred};
 
-            schedule_event(EventType::FLIGHT_COMPLETE, current_time_hours_ + flight_time, flight_data);
+            schedule_event(EventType::FLIGHT_COMPLETE, current_time_hours_ + flight_time, EventData(flight_data));
         }
 
         template <typename Fleet>
@@ -396,7 +440,7 @@ namespace evtol
 
             schedule_event(EventType::CHARGING_COMPLETE,
                            current_time_hours_ + charge_time,
-                           charge_data);
+                           EventData(charge_data));
         }
 
         template <typename Fleet>
@@ -411,16 +455,16 @@ namespace evtol
                 auto event = event_queue_.top();
                 event_queue_.pop();
 
-                std::visit([&](const auto &data)
-                {
-                    using T = std::decay_t<decltype(data)>;
-                    
-                    if constexpr (std::is_same_v<T, FlightCompleteData>) {
-                        handle_partial_flight(data, fleet);
-                    } else if constexpr (std::is_same_v<T, ChargingCompleteData>) {
-                        handle_partial_charge(data, fleet);
-                    }
-                }, event.data);
+                switch (event.data.type) {
+                    case EventType::FLIGHT_COMPLETE:
+                        handle_partial_flight(event.data.flight_data, fleet);
+                        break;
+                    case EventType::CHARGING_COMPLETE:
+                        handle_partial_charge(event.data.charge_data, fleet);
+                        break;
+                    case EventType::FAULT_OCCURRED:
+                        break; // No partial handling for faults
+                }
             }
         }
 

@@ -199,8 +199,15 @@ namespace evtol
     class Aircraft : public AircraftBase
     {
     private:
-        static inline std::mt19937 rng{std::random_device{}()};
-        static inline std::uniform_real_distribution<double> fault_dist{0.0, 1.0};
+        static std::mt19937& get_rng() {
+            static std::mt19937 rng{std::random_device{}()};
+            return rng;
+        }
+        
+        static std::uniform_real_distribution<double>& get_fault_dist() {
+            static std::uniform_real_distribution<double> fault_dist{0.0, 1.0};
+            return fault_dist;
+        }
 
     public:
         Aircraft(int id) : aircraft_id_(id), battery_level_(1.0), is_faulty_(false) {}
@@ -231,11 +238,11 @@ namespace evtol
 
             // Simple probability check for fault during this flight
             double flight_fault_probability = fault_rate * flight_time_hours;
-            if (fault_dist(rng) < flight_fault_probability)
+            if (get_fault_dist()(get_rng()) < flight_fault_probability)
             {
                 // Fault occurs - randomly pick a time during the flight
                 // this could be more sophisticated, but should work for our purposes
-                return fault_dist(rng) * flight_time_hours;
+                return get_fault_dist()(get_rng()) * flight_time_hours;
             }
             return -1.0;
         }

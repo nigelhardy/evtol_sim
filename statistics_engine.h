@@ -67,9 +67,9 @@ namespace evtol
         void set_aircraft_counts(const Fleet& fleet)
         {
             // Reset counts
-            for (auto& [type, count] : aircraft_counts_)
+            for (auto& pair : aircraft_counts_)
             {
-                count = 0;
+                pair.second = 0;
             }
             
             // Count aircraft by type
@@ -89,12 +89,28 @@ namespace evtol
         void record_flight(AircraftType type, double flight_time, double distance, int passengers, MetricArgs &&...args)
         {
             stats_[type].add_flight(flight_time, distance, passengers);
-
-            if constexpr (sizeof...(args) > 0)
-            {
-                record_additional_metrics(type, std::forward<MetricArgs>(args)...);
-            }
+            record_additional_metrics_helper(type, std::forward<MetricArgs>(args)...);
         }
+        
+        template <typename... MetricArgs>
+        void record_additional_metrics_helper(AircraftType type, MetricArgs &&...args)
+        {
+            record_additional_metrics_helper_impl(type, std::forward<MetricArgs>(args)...);
+        }
+        
+    private:
+        template <typename... MetricArgs>
+        void record_additional_metrics_helper_impl(AircraftType type, MetricArgs &&...args)
+        {
+            record_additional_metrics(type, std::forward<MetricArgs>(args)...);
+        }
+        
+        void record_additional_metrics_helper_impl(AircraftType)
+        {
+            // Base case - no-op
+        }
+        
+    public:
         // allow mock classes to override (since not allowed with template methods)
         virtual void record_charge_session(AircraftType type, double charge_time)
         {
@@ -115,12 +131,28 @@ namespace evtol
         void record_charge_session(AircraftType type, double charge_time, MetricArgs &&...args)
         {
             stats_[type].add_charge_session(charge_time);
-
-            if constexpr (sizeof...(args) > 0)
-            {
-                record_additional_metrics(type, std::forward<MetricArgs>(args)...);
-            }
+            record_additional_metrics_helper2(type, std::forward<MetricArgs>(args)...);
         }
+        
+        template <typename... MetricArgs>
+        void record_additional_metrics_helper2(AircraftType type, MetricArgs &&...args)
+        {
+            record_additional_metrics_helper2_impl(type, std::forward<MetricArgs>(args)...);
+        }
+        
+    private:
+        template <typename... MetricArgs>
+        void record_additional_metrics_helper2_impl(AircraftType type, MetricArgs &&...args)
+        {
+            record_additional_metrics(type, std::forward<MetricArgs>(args)...);
+        }
+        
+        void record_additional_metrics_helper2_impl(AircraftType)
+        {
+            // Base case - no-op
+        }
+        
+    public:
 
         virtual void record_fault(AircraftType type)
         {
@@ -141,16 +173,31 @@ namespace evtol
         template <typename Metric, typename... Rest>
         void record_additional_metrics(AircraftType type, Metric &&metric, Rest &&...rest)
         {
-            if constexpr (std::is_arithmetic_v<std::decay_t<Metric>>)
-            {
-                stats_[type].total_passenger_miles += static_cast<double>(metric);
-            }
-
-            if constexpr (sizeof...(rest) > 0)
-            {
-                record_additional_metrics(type, std::forward<Rest>(rest)...);
-            }
+            static_assert(std::is_arithmetic<typename std::decay<Metric>::type>::value, "Metric must be arithmetic");
+            stats_[type].total_passenger_miles += static_cast<double>(metric);
+            
+            record_additional_metrics_impl(type, std::forward<Rest>(rest)...);
         }
+        
+        template <typename... Rest>
+        void record_additional_metrics_impl(AircraftType type, Rest &&...rest)
+        {
+            record_additional_metrics_real_impl(type, std::forward<Rest>(rest)...);
+        }
+        
+    private:
+        template <typename... Rest>
+        void record_additional_metrics_real_impl(AircraftType type, Rest &&...rest)
+        {
+            record_additional_metrics(type, std::forward<Rest>(rest)...);
+        }
+        
+        void record_additional_metrics_real_impl(AircraftType)
+        {
+            // Base case - no-op
+        }
+        
+    public:
 
         const FlightStats &get_stats(AircraftType type) const
         {
@@ -162,11 +209,11 @@ namespace evtol
         {
             std::vector<std::pair<AircraftType, FlightStats>> filtered;
 
-            for (const auto &[type, stats] : stats_)
+            for (const auto &pair : stats_)
             {
-                if (pred(type, stats))
+                if (pred(pair.first, pair.second))
                 {
-                    filtered.emplace_back(type, stats);
+                    filtered.emplace_back(pair.first, pair.second);
                 }
             }
 
@@ -186,8 +233,10 @@ namespace evtol
             oss << std::fixed << std::setprecision(2);
             oss << "\n========== eVTOL Simulation Results ==========\n\n";
 
-            for (const auto &[type, stats] : stats_)
+            for (const auto &pair : stats_)
             {
+                const auto& type = pair.first;
+                const auto& stats = pair.second;
                 int count = aircraft_counts_.at(type);
                 oss << aircraft_type_names[static_cast<int>(type)] << " Aircraft(" << count << "):\n";
                 oss << "  Average Flight Time: " << stats.avg_flight_time() << " hours\n";
@@ -253,8 +302,9 @@ namespace evtol
         {
             SummaryStats summary;
 
-            for (const auto &[type, stats] : stats_)
+            for (const auto &pair : stats_)
             {
+                const auto& stats = pair.second;
                 summary.total_flight_time += stats.total_flight_time_hours;
                 summary.total_distance += stats.total_distance_miles;
                 summary.total_charging_time += stats.total_charging_time_hours;
@@ -293,9 +343,9 @@ namespace evtol
 
         void reset_stats()
         {
-            for (auto &[type, stats] : stats_)
+            for (auto &pair : stats_)
             {
-                stats = FlightStats{};
+                pair.second = FlightStats{};
             }
         }
     };
