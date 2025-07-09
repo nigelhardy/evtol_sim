@@ -108,25 +108,6 @@ namespace evtol_test
         EXPECT_GE(summary.total_flights, 0);
     }
 
-    // Test extremely large simulation duration
-    // TODO: remove? because of faults, this never completes with a ton of flights
-    // TEST_F(EdgeCasesTest, ExtremelyLargeSimulationDuration) {
-    //     auto fleet = evtol::AircraftFactory<>::create_fleet(5);
-    //     evtol::EventDrivenSimulation sim_engine(*stats_collector_, 1000000.0); // 1 million hours
-
-    //     auto start_time = std::chrono::high_resolution_clock::now();
-    //     sim_engine.run_simulation(*charger_manager_, fleet);
-    //     auto end_time = std::chrono::high_resolution_clock::now();
-
-    //     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-    //     // Should still complete in reasonable time
-    //     EXPECT_LT(duration.count(), 60000); // Less than 1 minute
-
-    //     auto summary = stats_collector_->get_summary_stats();
-    //     EXPECT_GT(summary.total_flights, 100); // Many flights in long simulation
-    // }
-
     // Test fleet with single aircraft type only
     TEST_F(EdgeCasesTest, FleetWithSingleAircraftTypeOnly)
     {

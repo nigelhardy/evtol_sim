@@ -227,7 +227,7 @@ namespace evtol_test
 
         std::unique_ptr<evtol::StatisticsCollector> stats_collector_;
     };
-    // TODO Do we want these setup functions in test utilities? Or in the test themselves??
+    // TODO Not in love with location these setup functions for tests, but works for now
     class SimulationEngineTest : public ::testing::Test
     {
     protected:

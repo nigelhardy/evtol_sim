@@ -61,21 +61,17 @@ $(TEST_BUILD_DIR)/%.o: %.cpp $(HEADERS) | $(TEST_BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(TEST_FLAGS) $(GTEST_INCLUDE) -I. -c $< -o $@
 
 # Individual test targets
-.PHONY: test-aircraft
-test-aircraft: test-build
-	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="Aircraft*"
+.PHONY: test-core
+test-core: test-build
+	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="CoreFunctionalityTest*"
 
-.PHONY: test-charger
-test-charger: test-build
-	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="ChargerManager*"
+.PHONY: test-behavior
+test-behavior: test-build
+	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="SystemBehaviorTest*"
 
-.PHONY: test-stats
-test-stats: test-build
-	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="Statistics*"
-
-.PHONY: test-simulation
-test-simulation: test-build
-	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="Simulation*"
+.PHONY: test-edge
+test-edge: test-build
+	./$(TEST_BUILD_DIR)/$(TEST_TARGET) --gtest_filter="EdgeCasesTest*"
 
 # Create build directories
 $(BUILD_DIR):
@@ -108,10 +104,9 @@ help:
 	@echo "  debug          - Build debug version with sanitizers"
 	@echo "  test           - Build and run all tests"
 	@echo "  test-build     - Build test executable only"
-	@echo "  test-aircraft  - Run only aircraft-related tests"
-	@echo "  test-charger   - Run only charger manager tests"
-	@echo "  test-stats     - Run only statistics tests"
-	@echo "  test-simulation - Run only simulation engine tests"
+	@echo "  test-core      - Run core functionality tests (8 tests)"
+	@echo "  test-behavior  - Run system behavior tests (6 tests)"
+	@echo "  test-edge      - Run edge case tests (6 tests)"
 	@echo "  run-debug      - Run debug build"
 	@echo "  clean          - Remove build files"
 	@echo "  clean-all      - Remove all generated files"

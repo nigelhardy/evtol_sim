@@ -1,0 +1,78 @@
+========== eVTOL Aircraft Simulation ==========
+Fleet Size: 20 aircraft
+Chargers Available: 3
+Simulation Duration: 3 hours
+Mode: Frame-Based
+Frame Time: 60 seconds
+Starting simulation...
+
+Simulation completed in 972 microseconds (0.972 ms)
+
+
+========== eVTOL Simulation Results ==========
+
+Echo Aircraft(4):
+  Average Flight Time: 0.80 hours
+  Average Distance: 23.90 miles
+  Average Charging Time: 0.30 hours
+  Average Waiting Time: 1.10 hours
+  Average Total Charge Time (including waiting): 1.40 hours
+  Total Faults: 0
+  Total Passenger Miles: 382.34
+  Total Flights: 8
+  Total Charge Sessions: 4
+
+Delta Aircraft(4):
+  Average Flight Time: 1.36 hours
+  Average Distance: 122.70 miles
+  Average Charging Time: 0.62 hours
+  Average Waiting Time: 0.27 hours
+  Average Total Charge Time (including waiting): 0.89 hours
+  Total Faults: 1
+  Total Passenger Miles: 1227.00
+  Total Flights: 5
+  Total Charge Sessions: 2
+
+Charlie Aircraft(4):
+  Average Flight Time: 0.62 hours
+  Average Distance: 100.00 miles
+  Average Charging Time: 0.80 hours
+  Average Waiting Time: 0.20 hours
+  Average Total Charge Time (including waiting): 1.00 hours
+  Total Faults: 1
+  Total Passenger Miles: 2400.00
+  Total Flights: 8
+  Total Charge Sessions: 4
+
+Beta Aircraft(4):
+  Average Flight Time: 0.67 hours
+  Average Distance: 66.67 miles
+  Average Charging Time: 0.20 hours
+  Average Waiting Time: 0.87 hours
+  Average Total Charge Time (including waiting): 1.07 hours
+  Total Faults: 1
+  Total Passenger Miles: 2666.67
+  Total Flights: 8
+  Total Charge Sessions: 4
+
+Alpha Aircraft(4):
+  Average Flight Time: 1.33 hours
+  Average Distance: 160.00 miles
+  Average Charging Time: 0.27 hours
+  Average Waiting Time: 0.24 hours
+  Average Total Charge Time (including waiting): 0.52 hours
+  Total Faults: 1
+  Total Passenger Miles: 3200.00
+  Total Flights: 5
+  Total Charge Sessions: 3
+
+========== Summary Statistics ==========
+Total Flight Time: 30.19 hours
+Total Distance: 2938.01 miles
+Total Charging Time: 7.25 hours
+Total Waiting Time: 9.95 hours
+Total Faults: 4
+Total Passenger Miles: 9876.01
+Total Flights: 34
+Total Charge Sessions: 17
+

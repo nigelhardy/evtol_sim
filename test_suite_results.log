@@ -1,0 +1,55 @@
+Running main() from /private/tmp/googletest-20250430-4705-6kzjyz/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 20 tests from 3 test suites.
+[----------] Global test environment set-up.
+[----------] 8 tests from CoreFunctionalityTest
+[ RUN      ] CoreFunctionalityTest.CompleteSimulationWorkflow
+[       OK ] CoreFunctionalityTest.CompleteSimulationWorkflow (0 ms)
+[ RUN      ] CoreFunctionalityTest.BasicFleetCreation
+[       OK ] CoreFunctionalityTest.BasicFleetCreation (0 ms)
+[ RUN      ] CoreFunctionalityTest.AlphaAircraftConstruction
+[       OK ] CoreFunctionalityTest.AlphaAircraftConstruction (0 ms)
+[ RUN      ] CoreFunctionalityTest.SingleChargerRequest
+[       OK ] CoreFunctionalityTest.SingleChargerRequest (0 ms)
+[ RUN      ] CoreFunctionalityTest.RecordSingleFlight
+[       OK ] CoreFunctionalityTest.RecordSingleFlight (0 ms)
+[ RUN      ] CoreFunctionalityTest.MultipleAircraftSimulation
+[       OK ] CoreFunctionalityTest.MultipleAircraftSimulation (0 ms)
+[ RUN      ] CoreFunctionalityTest.AircraftTypeDistributionInResults
+[       OK ] CoreFunctionalityTest.AircraftTypeDistributionInResults (0 ms)
+[ RUN      ] CoreFunctionalityTest.ReportGenerationWithRealData
+[       OK ] CoreFunctionalityTest.ReportGenerationWithRealData (0 ms)
+[----------] 8 tests from CoreFunctionalityTest (1 ms total)
+
+[----------] 6 tests from EdgeCasesTest
+[ RUN      ] EdgeCasesTest.ZeroDurationSimulation
+[       OK ] EdgeCasesTest.ZeroDurationSimulation (0 ms)
+[ RUN      ] EdgeCasesTest.EmptyFleetWithPositiveDuration
+[       OK ] EdgeCasesTest.EmptyFleetWithPositiveDuration (0 ms)
+[ RUN      ] EdgeCasesTest.ExtremeChargerToAircraftRatio
+[       OK ] EdgeCasesTest.ExtremeChargerToAircraftRatio (0 ms)
+[ RUN      ] EdgeCasesTest.VerySmallSimulationDuration
+[       OK ] EdgeCasesTest.VerySmallSimulationDuration (0 ms)
+[ RUN      ] EdgeCasesTest.ChargingQueueOverflowScenario
+[       OK ] EdgeCasesTest.ChargingQueueOverflowScenario (0 ms)
+[ RUN      ] EdgeCasesTest.AircraftIndependence
+[       OK ] EdgeCasesTest.AircraftIndependence (0 ms)
+[----------] 6 tests from EdgeCasesTest (1 ms total)
+
+[----------] 6 tests from SystemBehaviorTest
+[ RUN      ] SystemBehaviorTest.DifferentFleetSizes
+[       OK ] SystemBehaviorTest.DifferentFleetSizes (0 ms)
+[ RUN      ] SystemBehaviorTest.ChargerUtilizationDuringSimulation
+[       OK ] SystemBehaviorTest.ChargerUtilizationDuringSimulation (0 ms)
+[ RUN      ] SystemBehaviorTest.FaultOccurrenceAndHandling
+[       OK ] SystemBehaviorTest.FaultOccurrenceAndHandling (0 ms)
+[ RUN      ] SystemBehaviorTest.AircraftBehaviorConsistency
+[       OK ] SystemBehaviorTest.AircraftBehaviorConsistency (0 ms)
+[ RUN      ] SystemBehaviorTest.PerformanceCharacteristics
+[       OK ] SystemBehaviorTest.PerformanceCharacteristics (0 ms)
+[ RUN      ] SystemBehaviorTest.SystemBehaviorUnderStress
+[       OK ] SystemBehaviorTest.SystemBehaviorUnderStress (1 ms)
+[----------] 6 tests from SystemBehaviorTest (4 ms total)
+
+[----------] Global test environment tear-down
+[==========] 20 tests from 3 test suites ran. (6 ms total)
+[  PASSED  ] 20 tests.

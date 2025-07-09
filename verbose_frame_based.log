@@ -1,0 +1,267 @@
+========== eVTOL Aircraft Simulation ==========
+Fleet Size: 20 aircraft
+Chargers Available: 3
+Simulation Duration: 3 hours
+Mode: Frame-Based
+Frame Time: 60 seconds
+Starting simulation...
+
+[0h] === Starting frame-based simulation ===
+[0h] Fleet size: 20
+[0h] Available chargers: 3
+[0h] Frame time: 60.000000 seconds
+[0h] Initializing aircraft states...
+[0h] Starting flight for aircraft 0 (distance: 200.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 1 (distance: 66.666667 miles, flight time: 0.666667h)
+[0h] Starting flight for aircraft 2 (distance: 100.000000 miles, flight time: 0.625000h)
+[0h] Starting flight for aircraft 3 (distance: 150.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 4 (distance: 25.862069 miles, flight time: 0.862069h)
+[0h] Starting flight for aircraft 5 (distance: 200.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 6 (distance: 66.666667 miles, flight time: 0.666667h)
+[0h] Starting flight for aircraft 7 (distance: 100.000000 miles, flight time: 0.625000h)
+[0h] Starting flight for aircraft 8 (distance: 150.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 9 (distance: 25.862069 miles, flight time: 0.862069h)
+[0h] Aircraft 9 will experience fault during this flight
+[0h] Starting flight for aircraft 10 (distance: 200.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 11 (distance: 66.666667 miles, flight time: 0.666667h)
+[0h] Starting flight for aircraft 12 (distance: 100.000000 miles, flight time: 0.625000h)
+[0h] Starting flight for aircraft 13 (distance: 150.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 14 (distance: 25.862069 miles, flight time: 0.862069h)
+[0h] Aircraft 14 will experience fault during this flight
+[0h] Starting flight for aircraft 15 (distance: 200.000000 miles, flight time: 1.666667h)
+[0h] Starting flight for aircraft 16 (distance: 66.666667 miles, flight time: 0.666667h)
+[0h] Starting flight for aircraft 17 (distance: 100.000000 miles, flight time: 0.625000h)
+[0h] Starting flight for aircraft 18 (distance: 150.000000 miles, flight time: 1.666667h)
+[0h] Aircraft 18 will experience fault during this flight
+[0h] Starting flight for aircraft 19 (distance: 25.862069 miles, flight time: 0.862069h)
+[0h] Aircraft 19 will experience fault during this flight
+[0h] Aircraft states initialized - all aircraft scheduled for initial flights
+[0.5h] Frame 31 completed - Time: 0.500000h
+[0.6h] Aircraft 2 completed flight (100.000000 miles, 0.625000h)
+[0.6h] Aircraft 2 assigned to charger immediately
+[0.6h] Starting charging for aircraft 2 (charge time: 0.800000h, waited: 0.000000h)
+[0.6h] Aircraft 7 completed flight (100.000000 miles, 0.625000h)
+[0.6h] Aircraft 7 assigned to charger immediately
+[0.6h] Starting charging for aircraft 7 (charge time: 0.800000h, waited: 0.000000h)
+[0.6h] Aircraft 12 completed flight (100.000000 miles, 0.625000h)
+[0.6h] Aircraft 12 assigned to charger immediately
+[0.6h] Starting charging for aircraft 12 (charge time: 0.800000h, waited: 0.000000h)
+[0.6h] Aircraft 17 completed flight (100.000000 miles, 0.625000h)
+[0.6h] Aircraft 17 added to charging queue (no chargers available)
+[0.633333h] Aircraft 1 completed flight (66.666667 miles, 0.666667h)
+[0.633333h] Aircraft 1 added to charging queue (no chargers available)
+[0.633333h] Aircraft 6 completed flight (66.666667 miles, 0.666667h)
+[0.633333h] Aircraft 6 added to charging queue (no chargers available)
+[0.633333h] Aircraft 11 completed flight (66.666667 miles, 0.666667h)
+[0.633333h] Aircraft 11 added to charging queue (no chargers available)
+[0.633333h] Aircraft 16 completed flight (66.666667 miles, 0.666667h)
+[0.633333h] Aircraft 16 added to charging queue (no chargers available)
+[0.833333h] Aircraft 4 completed flight (25.862069 miles, 0.862069h)
+[0.833333h] Aircraft 4 added to charging queue (no chargers available)
+[0.833333h] Aircraft 9 completed flight (25.862069 miles, 0.862069h)
+[0.833333h] Aircraft 9 experienced fault during flight - aircraft grounded
+[0.833333h] Aircraft 14 completed flight (25.862069 miles, 0.862069h)
+[0.833333h] Aircraft 14 experienced fault during flight - aircraft grounded
+[0.833333h] Aircraft 19 completed flight (25.862069 miles, 0.862069h)
+[0.833333h] Aircraft 19 experienced fault during flight - aircraft grounded
+[1h] Frame 61 completed - Time: 1.000000h
+[1.4h] Aircraft 2 completed charging (0.800000h charge, 0.000000h wait)
+[1.4h] Aircraft 17 removed from queue and assigned charger (waited 0.800000h)
+[1.4h] Starting charging for aircraft 17 (charge time: 0.800000h, waited: 0.800000h)
+[1.4h] Aircraft 2 ready for next flight
+[1.4h] Aircraft 7 completed charging (0.800000h charge, 0.000000h wait)
+[1.4h] Aircraft 1 removed from queue and assigned charger (waited 0.766667h)
+[1.4h] Starting charging for aircraft 1 (charge time: 0.200000h, waited: 0.766667h)
+[1.4h] Aircraft 7 ready for next flight
+[1.4h] Aircraft 12 completed charging (0.800000h charge, 0.000000h wait)
+[1.4h] Aircraft 6 removed from queue and assigned charger (waited 0.766667h)
+[1.4h] Starting charging for aircraft 6 (charge time: 0.200000h, waited: 0.766667h)
+[1.4h] Aircraft 12 ready for next flight
+[1.41667h] Starting flight for aircraft 2 (distance: 100.000000 miles, flight time: 0.625000h)
+[1.41667h] Starting flight for aircraft 7 (distance: 100.000000 miles, flight time: 0.625000h)
+[1.41667h] Starting flight for aircraft 12 (distance: 100.000000 miles, flight time: 0.625000h)
+[1.5h] Frame 91 completed - Time: 1.500000h
+[1.6h] Aircraft 1 completed charging (0.200000h charge, 0.766667h wait)
+[1.6h] Aircraft 11 removed from queue and assigned charger (waited 0.966667h)
+[1.6h] Starting charging for aircraft 11 (charge time: 0.200000h, waited: 0.966667h)
+[1.6h] Aircraft 1 ready for next flight
+[1.6h] Aircraft 6 completed charging (0.200000h charge, 0.766667h wait)
+[1.6h] Aircraft 16 removed from queue and assigned charger (waited 0.966667h)
+[1.6h] Starting charging for aircraft 16 (charge time: 0.200000h, waited: 0.966667h)
+[1.6h] Aircraft 6 ready for next flight
+[1.61667h] Starting flight for aircraft 1 (distance: 66.666667 miles, flight time: 0.666667h)
+[1.61667h] Starting flight for aircraft 6 (distance: 66.666667 miles, flight time: 0.666667h)
+[1.63333h] Aircraft 0 completed flight (200.000000 miles, 1.666667h)
+[1.63333h] Aircraft 0 added to charging queue (no chargers available)
+[1.63333h] Aircraft 3 completed flight (150.000000 miles, 1.666667h)
+[1.63333h] Aircraft 3 added to charging queue (no chargers available)
+[1.63333h] Aircraft 5 completed flight (200.000000 miles, 1.666667h)
+[1.63333h] Aircraft 5 added to charging queue (no chargers available)
+[1.63333h] Aircraft 8 completed flight (150.000000 miles, 1.666667h)
+[1.63333h] Aircraft 8 added to charging queue (no chargers available)
+[1.63333h] Aircraft 10 completed flight (200.000000 miles, 1.666667h)
+[1.63333h] Aircraft 10 added to charging queue (no chargers available)
+[1.63333h] Aircraft 13 completed flight (150.000000 miles, 1.666667h)
+[1.63333h] Aircraft 13 added to charging queue (no chargers available)
+[1.63333h] Aircraft 15 completed flight (200.000000 miles, 1.666667h)
+[1.63333h] Aircraft 15 added to charging queue (no chargers available)
+[1.63333h] Aircraft 18 completed flight (150.000000 miles, 1.666667h)
+[1.63333h] Aircraft 18 experienced fault during flight - aircraft grounded
+[1.78333h] Aircraft 11 completed charging (0.200000h charge, 0.966667h wait)
+[1.78333h] Aircraft 4 removed from queue and assigned charger (waited 0.950000h)
+[1.78333h] Starting charging for aircraft 4 (charge time: 0.300000h, waited: 0.950000h)
+[1.78333h] Aircraft 11 ready for next flight
+[1.78333h] Aircraft 16 completed charging (0.200000h charge, 0.966667h wait)
+[1.78333h] Aircraft 0 removed from queue and assigned charger (waited 0.150000h)
+[1.78333h] Starting charging for aircraft 0 (charge time: 0.600000h, waited: 0.150000h)
+[1.78333h] Aircraft 16 ready for next flight
+[1.8h] Starting flight for aircraft 11 (distance: 66.666667 miles, flight time: 0.666667h)
+[1.8h] Starting flight for aircraft 16 (distance: 66.666667 miles, flight time: 0.666667h)
+[2h] Frame 121 completed - Time: 2.000000h
+[2.05h] Aircraft 2 completed flight (100.000000 miles, 0.625000h)
+[2.05h] Aircraft 2 added to charging queue (no chargers available)
+[2.05h] Aircraft 7 completed flight (100.000000 miles, 0.625000h)
+[2.05h] Aircraft 7 added to charging queue (no chargers available)
+[2.05h] Aircraft 12 completed flight (100.000000 miles, 0.625000h)
+[2.05h] Aircraft 12 added to charging queue (no chargers available)
+[2.08333h] Aircraft 4 completed charging (0.300000h charge, 0.950000h wait)
+[2.08333h] Aircraft 3 removed from queue and assigned charger (waited 0.450000h)
+[2.08333h] Starting charging for aircraft 3 (charge time: 0.620000h, waited: 0.450000h)
+[2.08333h] Aircraft 4 ready for next flight
+[2.1h] Starting flight for aircraft 4 (distance: 25.862069 miles, flight time: 0.862069h)
+[2.18333h] Aircraft 17 completed charging (0.800000h charge, 0.800000h wait)
+[2.18333h] Aircraft 5 removed from queue and assigned charger (waited 0.550000h)
+[2.18333h] Starting charging for aircraft 5 (charge time: 0.600000h, waited: 0.550000h)
+[2.18333h] Aircraft 17 ready for next flight
+[2.2h] Starting flight for aircraft 17 (distance: 100.000000 miles, flight time: 0.625000h)
+[2.28333h] Aircraft 1 completed flight (66.666667 miles, 0.666667h)
+[2.28333h] Aircraft 1 added to charging queue (no chargers available)
+[2.28333h] Aircraft 6 completed flight (66.666667 miles, 0.666667h)
+[2.28333h] Aircraft 6 added to charging queue (no chargers available)
+[2.38333h] Aircraft 0 completed charging (0.600000h charge, 0.150000h wait)
+[2.38333h] Aircraft 8 removed from queue and assigned charger (waited 0.750000h)
+[2.38333h] Starting charging for aircraft 8 (charge time: 0.620000h, waited: 0.750000h)
+[2.38333h] Aircraft 0 ready for next flight
+[2.4h] Starting flight for aircraft 0 (distance: 200.000000 miles, flight time: 1.666667h)
+[2.4h] Aircraft 0 will experience fault during this flight
+[2.46667h] Aircraft 11 completed flight (66.666667 miles, 0.666667h)
+[2.46667h] Aircraft 11 added to charging queue (no chargers available)
+[2.46667h] Aircraft 16 completed flight (66.666667 miles, 0.666667h)
+[2.46667h] Aircraft 16 added to charging queue (no chargers available)
+[2.5h] Frame 151 completed - Time: 2.500000h
+[2.71667h] Aircraft 3 completed charging (0.620000h charge, 0.450000h wait)
+[2.71667h] Aircraft 10 removed from queue and assigned charger (waited 1.083333h)
+[2.71667h] Starting charging for aircraft 10 (charge time: 0.600000h, waited: 1.083333h)
+[2.71667h] Aircraft 3 ready for next flight
+[2.73333h] Starting flight for aircraft 3 (distance: 150.000000 miles, flight time: 1.666667h)
+[2.78333h] Aircraft 5 completed charging (0.600000h charge, 0.550000h wait)
+[2.78333h] Aircraft 13 removed from queue and assigned charger (waited 1.150000h)
+[2.78333h] Starting charging for aircraft 13 (charge time: 0.620000h, waited: 1.150000h)
+[2.78333h] Aircraft 5 ready for next flight
+[2.8h] Starting flight for aircraft 5 (distance: 200.000000 miles, flight time: 1.666667h)
+[2.8h] Aircraft 5 will experience fault during this flight
+[2.83333h] Aircraft 17 completed flight (100.000000 miles, 0.625000h)
+[2.83333h] Aircraft 17 added to charging queue (no chargers available)
+[2.96667h] Aircraft 4 completed flight (25.862069 miles, 0.862069h)
+[2.96667h] Aircraft 4 added to charging queue (no chargers available)
+[3h] Frame 181 completed - Time: 3.000000h
+[3h] === Processing partial activities ===
+[3h] Processing partial flight for aircraft 0 (flew 0.583333h/1.666667h, 70.000000/200.000000 miles)
+[3h] Processing partial flight for aircraft 3 (flew 0.250000h/1.666667h, 22.500000/150.000000 miles)
+[3h] Processing partial flight for aircraft 5 (flew 0.183333h/1.666667h, 22.000000/200.000000 miles)
+[3h] Processing partial charge for aircraft 8 (charged 0.616667h/0.620000h, waited: 0.750000h)
+[3h] Processing partial charge for aircraft 10 (charged 0.283333h/0.600000h, waited: 1.083333h)
+[3h] Processing partial charge for aircraft 13 (charged 0.216667h/0.620000h, waited: 1.150000h)
+[3h] === Frame-based simulation completed ===
+[3h] Total frames processed: 181
+Simulation completed in 1450 microseconds (1.450 ms)
+
+
+========== eVTOL Simulation Results ==========
+
+Echo Aircraft(4):
+  Average Flight Time: 0.86 hours
+  Average Distance: 25.86 miles
+  Average Charging Time: 0.30 hours
+  Average Waiting Time: 0.95 hours
+  Average Total Charge Time (including waiting): 1.25 hours
+  Total Faults: 3
+  Total Passenger Miles: 258.62
+  Total Flights: 5
+  Total Charge Sessions: 1
+
+Delta Aircraft(4):
+  Average Flight Time: 1.38 hours
+  Average Distance: 124.50 miles
+  Average Charging Time: 0.48 hours
+  Average Waiting Time: 0.15 hours
+  Average Total Charge Time (including waiting): 0.63 hours
+  Total Faults: 1
+  Total Passenger Miles: 1245.00
+  Total Flights: 5
+  Total Charge Sessions: 3
+  --- Partial Activities (when simulation ended) ---
+  Partial Flights: 1
+  Partial Flight Time: 0.25 hours
+  Partial Distance: 22.50 miles
+  Partial Passenger Miles: 45.00
+  Partial Charges: 2
+  Partial Charging Time: 0.83 hours
+
+Charlie Aircraft(4):
+  Average Flight Time: 0.62 hours
+  Average Distance: 100.00 miles
+  Average Charging Time: 0.80 hours
+  Average Waiting Time: 0.20 hours
+  Average Total Charge Time (including waiting): 1.00 hours
+  Total Faults: 0
+  Total Passenger Miles: 2400.00
+  Total Flights: 8
+  Total Charge Sessions: 4
+
+Beta Aircraft(4):
+  Average Flight Time: 0.67 hours
+  Average Distance: 66.67 miles
+  Average Charging Time: 0.20 hours
+  Average Waiting Time: 0.87 hours
+  Average Total Charge Time (including waiting): 1.07 hours
+  Total Faults: 0
+  Total Passenger Miles: 2666.67
+  Total Flights: 8
+  Total Charge Sessions: 4
+
+Alpha Aircraft(4):
+  Average Flight Time: 1.24 hours
+  Average Distance: 148.67 miles
+  Average Charging Time: 0.49 hours
+  Average Waiting Time: 0.23 hours
+  Average Total Charge Time (including waiting): 0.73 hours
+  Total Faults: 0
+  Total Passenger Miles: 3568.00
+  Total Flights: 6
+  Total Charge Sessions: 3
+  --- Partial Activities (when simulation ended) ---
+  Partial Flights: 2
+  Partial Flight Time: 0.77 hours
+  Partial Distance: 92.00 miles
+  Partial Passenger Miles: 368.00
+  Partial Charges: 1
+  Partial Charging Time: 0.28 hours
+
+========== Summary Statistics ==========
+Total Flight Time: 28.99 hours
+Total Distance: 2977.14 miles
+Total Charging Time: 7.24 hours
+Total Waiting Time: 6.37 hours
+Total Faults: 4
+Total Passenger Miles: 10138.29
+Total Flights: 32
+Total Charge Sessions: 15
+--- Partial Activities Summary ---
+Total Partial Flights: 3
+Total Partial Flight Time: 1.02 hours
+Total Partial Distance: 114.50 miles
+Total Partial Passenger Miles: 413.00
+Total Partial Charges: 3
+Total Partial Charging Time: 1.12 hours
+
