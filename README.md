@@ -9,7 +9,7 @@ The simulation models a fleet of 20 eVTOL aircraft with 5 different aircraft typ
 
 Assumptions: 
 1. When a fault occurs, the flight is able to complete then the aircraft is grounded.
-   - For event based simulation, it is okay to calculate chance of fault before flight is complete
+   - For event based simulation, I assuemd it is okay to calculate chance of fault before flight is complete
 
 ## Basic Features
 - Two simulation modes: Event-driven and Frame-based
@@ -163,3 +163,32 @@ make test-simulation  # Simulation engine tests
 - Fixed time-step simulation with configurable frame duration
 - Could be a good structure for a visualization (I did attempt one, but decided it was too much work)
 - Configurable frame time (default: 60 seconds)
+
+## Sample Log Files
+
+The repository contains sample log files demonstrating different simulation outputs:
+
+- `basic_event_driven.log` - Event-driven simulation output
+- `basic_frame_based.log` - Frame-based simulation output
+- `verbose_event_driven.log` - Detailed event-driven logging
+- `verbose_frame_based.log` - Detailed frame-based logging
+- `test_suite_results.log` - Test execution results
+
+These logs show typical simulation behavior and can serve as reference outputs.
+
+## Potential Improvements and General Dev Story
+
+1. Multi-threading would be possible for frame-based approach
+   - I originally started adding mutexes and atomic variables, but decided it would be more time that I wanted to spend
+2. Monitor/Visualization
+   - Only really feasible for frame-based
+
+My basic design started as purely an event-based simulation. It felt like the most efficient way to approach this problem.
+Then, I started to feel like that approach was too basic, so I added a frame-based implementation configurable at runtime.
+I got a little carried away with making everything a template function, so that filled up my header files quite a bit.
+
+I'm used to using Visual Studio, so debugging and writing code was interesting.
+I experimented with writing tests with AI, but would have needed to spend more time with my prompts to make them helpful.
+
+TLDR; I spent more focus on OOP/C++ bells and whistles than I should have.
+I think focusing on one type of simulation would have been better for the scope of this assignment.
