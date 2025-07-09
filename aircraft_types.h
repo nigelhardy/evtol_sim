@@ -124,7 +124,7 @@ namespace evtol
     class AircraftFactory
     {
     private:
-        static inline std::mt19937 rng{std::random_device{}()};
+        static inline std::mt19937 rng{12345}; // Fixed seed for consistent comparison
         static inline std::uniform_int_distribution<int> aircraft_dist{0, 4};
 
     public:

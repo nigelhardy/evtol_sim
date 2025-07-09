@@ -49,11 +49,6 @@ namespace evtol
          */
         virtual bool is_running() const = 0;
 
-        /**
-         * Stop the simulation
-         */
-        virtual void stop() {}
-
     protected:
         /**
          * Implementation-specific simulation runner

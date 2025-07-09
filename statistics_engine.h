@@ -217,6 +217,34 @@ namespace evtol
                 oss << "\n";
             }
 
+            // Add summary statistics
+            SummaryStats summary = get_summary_stats();
+            oss << "========== Summary Statistics ==========\n";
+            oss << "Total Flight Time: " << summary.total_flight_time << " hours\n";
+            oss << "Total Distance: " << summary.total_distance << " miles\n";
+            oss << "Total Charging Time: " << summary.total_charging_time << " hours\n";
+            oss << "Total Waiting Time: " << summary.total_waiting_time << " hours\n";
+            oss << "Total Faults: " << summary.total_faults << "\n";
+            oss << "Total Passenger Miles: " << summary.total_passenger_miles << "\n";
+            oss << "Total Flights: " << summary.total_flights << "\n";
+            oss << "Total Charge Sessions: " << summary.total_charges << "\n";
+            
+            // Add partial activities summary if enabled
+            if (show_partial_activities && (summary.partial_flights > 0 || summary.partial_charges > 0)) {
+                oss << "--- Partial Activities Summary ---\n";
+                if (summary.partial_flights > 0) {
+                    oss << "Total Partial Flights: " << summary.partial_flights << "\n";
+                    oss << "Total Partial Flight Time: " << summary.partial_flight_time << " hours\n";
+                    oss << "Total Partial Distance: " << summary.partial_distance << " miles\n";
+                    oss << "Total Partial Passenger Miles: " << summary.partial_passenger_miles << "\n";
+                }
+                if (summary.partial_charges > 0) {
+                    oss << "Total Partial Charges: " << summary.partial_charges << "\n";
+                    oss << "Total Partial Charging Time: " << summary.partial_charging_time << " hours\n";
+                }
+            }
+            oss << "\n";
+
             return oss.str();
         }
 

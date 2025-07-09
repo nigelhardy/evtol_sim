@@ -61,13 +61,6 @@ namespace evtol
          */
         const SimulationConfig &get_config() const { return config_; }
 
-        // Control methods (delegate to engine)
-        void stop()
-        {
-            if (engine_)
-                engine_->stop();
-        }
-
         // Status methods
         bool is_running() const { return engine_ && engine_->is_running(); }
         double get_current_time() const { return engine_ ? engine_->get_current_time() : 0.0; }

@@ -22,23 +22,15 @@ namespace evtol
     {
     private:
         SimulationConfig config_;
-        std::vector<std::thread> worker_threads_;
-
-        // Threading synchronization
-        std::condition_variable frame_cv_;
-        std::mutex frame_mutex_;
-        std::atomic<int> threads_completed_{0};
 
         // Frame-based state
         std::vector<AircraftFrameData> aircraft_frame_data_;
-        std::vector<std::unique_ptr<AircraftStateMachine>> state_machines_;
 
         // Performance tracking
-        std::chrono::high_resolution_clock::time_point last_frame_time_;
         double frame_time_seconds_;
 
         // Logging helper
-        void log_event(const std::string& message) const
+        void log_event(const std::string &message) const
         {
             if (config_.enable_detailed_logging)
             {
@@ -48,10 +40,7 @@ namespace evtol
 
     public:
         FrameBasedSimulationEngine(StatisticsCollector &stats, const SimulationConfig &config);
-        ~FrameBasedSimulationEngine();
-
-        // ISimulationEngine interface
-        void stop() override;
+        ~FrameBasedSimulationEngine() = default;
 
     protected:
         void run_simulation_impl(ChargerManager &charger_mgr, void *fleet_ptr) override;
@@ -65,10 +54,6 @@ namespace evtol
 
         template <typename Fleet>
         void update_frame(ChargerManager &charger_mgr, Fleet &fleet);
-
-        template <typename Fleet>
-        void update_aircraft_subset(ChargerManager &charger_mgr, Fleet &fleet,
-                                    size_t start_idx, size_t end_idx);
 
         template <typename Fleet>
         void process_aircraft_state(ChargerManager &charger_mgr, Fleet &fleet,
@@ -96,18 +81,6 @@ namespace evtol
 
         void handle_partial_charging(std::unique_ptr<AircraftBase> &aircraft, AircraftFrameData &frame_data);
 
-        // Threading support
-        void start_worker_threads();
-        void stop_worker_threads();
-        void worker_thread_main(int thread_id);
-        void wait_for_all_threads();
-        void signal_frame_start();
-        void signal_frame_complete();
-
-        // Timing
-        void wait_for_frame_time();
-        double get_frame_delta_time();
-
         // State validation
         template <typename Fleet>
         bool validate_simulation_state(Fleet &fleet) const;
@@ -127,14 +100,7 @@ namespace evtol
 
         initialize_aircraft_states(fleet);
 
-        // Disable multithreading for now to avoid deadlocks
-        // if (config_.enable_multithreading && config_.num_threads > 1)
-        // {
-        //     start_worker_threads();
-        // }
-
         is_running_ = true;
-        last_frame_time_ = std::chrono::high_resolution_clock::now();
 
         int frame_count = 0;
         double last_log_time = 0.0;
@@ -145,7 +111,7 @@ namespace evtol
             update_frame(charger_mgr, fleet);
 
             // Advance time
-            current_time_hours_ += frame_time_seconds_ / 3600.0;
+            current_time_hours_ = (frame_count * frame_time_seconds_) / 3600.0;
             frame_count++;
 
             // Log frame progress every 0.5 hours
@@ -156,19 +122,13 @@ namespace evtol
             }
         }
 
-        // Disable multithreading for now to avoid deadlocks
-        // if (config_.enable_multithreading && config_.num_threads > 1)
-        // {
-        //     stop_worker_threads();
-        // }
-
         // Handle partial activities if enabled
         if (config_.enable_partial_flights)
         {
             log_event("=== Processing partial activities ===");
             finalize_simulation(fleet);
         }
-        
+
         log_event("=== Frame-based simulation completed ===");
         log_event("Total frames processed: " + std::to_string(frame_count));
         is_running_ = false;
@@ -179,14 +139,11 @@ namespace evtol
     {
         log_event("Initializing aircraft states...");
         aircraft_frame_data_.resize(fleet.size());
-        state_machines_.clear();
-        state_machines_.reserve(fleet.size());
 
         for (size_t i = 0; i < fleet.size(); ++i)
         {
             auto &frame_data = aircraft_frame_data_[i];
             frame_data.reset_for_activity(AircraftState::IDLE, 0.0);
-            state_machines_.push_back(std::make_unique<AircraftStateMachine>(frame_data));
 
             // Schedule initial flight
             start_new_flight(fleet, i);
@@ -197,15 +154,7 @@ namespace evtol
     template <typename Fleet>
     void FrameBasedSimulationEngine::update_frame(ChargerManager &charger_mgr, Fleet &fleet)
     {
-        // Always use single-threaded for now
-        update_aircraft_subset(charger_mgr, fleet, 0, fleet.size());
-    }
-
-    template <typename Fleet>
-    void FrameBasedSimulationEngine::update_aircraft_subset(ChargerManager &charger_mgr, Fleet &fleet,
-                                                            size_t start_idx, size_t end_idx)
-    {
-        for (size_t i = start_idx; i < end_idx; ++i)
+        for (size_t i = 0; i < fleet.size(); ++i)
         {
             process_aircraft_state(charger_mgr, fleet, i);
         }
@@ -216,28 +165,23 @@ namespace evtol
                                                             size_t aircraft_idx)
     {
         auto &frame_data = aircraft_frame_data_[aircraft_idx];
-        auto &state_machine = *state_machines_[aircraft_idx];
 
-        double delta_time = frame_time_seconds_; // This is in seconds
+        double delta_time_sec = frame_time_seconds_; // This is in seconds
 
-        // Update state machine
-        // TODO does this return something useful? I removed monitor, so maybe we can update that return
-        state_machine.update_frame(delta_time);
+        frame_data.update_time_remaining(delta_time_sec);
 
         // Process based on current state
         switch (frame_data.get_state())
         {
         case AircraftState::FLYING:
-            frame_data.update_time_remaining(delta_time);
-            if (frame_data.time_remaining <= 0.0)
+            if (frame_data.time_remaining_sec <= 0.0)
             {
                 handle_flight_completion(charger_mgr, fleet, aircraft_idx);
             }
             break;
 
         case AircraftState::CHARGING:
-            frame_data.update_time_remaining(delta_time);
-            if (frame_data.time_remaining <= 0.0)
+            if (frame_data.time_remaining_sec <= 0.0)
             {
                 handle_charging_completion(charger_mgr, fleet, aircraft_idx);
             }
@@ -249,10 +193,10 @@ namespace evtol
             {
                 // Calculate waiting time
                 double waiting_time = (current_time_hours_ - frame_data.waiting_start_time) * 3600.0; // Convert to seconds
-                frame_data.accumulated_waiting_time = waiting_time;
+                frame_data.accumulated_waiting_time_sec = waiting_time;
 
-                log_event("Aircraft " + std::to_string(fleet[aircraft_idx]->get_id()) + " assigned charger after waiting " + 
-                         std::to_string(waiting_time / 3600.0) + "h");
+                log_event("Aircraft " + std::to_string(fleet[aircraft_idx]->get_id()) + " assigned charger after waiting " +
+                          std::to_string(waiting_time / 3600.0) + "h");
                 start_charging(charger_mgr, fleet, aircraft_idx);
             }
             break;
@@ -275,16 +219,16 @@ namespace evtol
         auto &aircraft = fleet[aircraft_idx];
         auto &frame_data = aircraft_frame_data_[aircraft_idx];
 
-        log_event("Aircraft " + std::to_string(aircraft->get_id()) + " completed flight (" + 
-                 std::to_string(frame_data.current_flight_distance) + " miles, " + 
-                 std::to_string(frame_data.current_flight_time) + "h)");
+        log_event("Aircraft " + std::to_string(aircraft->get_id()) + " completed flight (" +
+                  std::to_string(frame_data.current_flight_distance) + " miles, " +
+                  std::to_string(frame_data.current_flight_time_hrs) + "h)");
 
-        // Discharge battery
+        // Discharge battery (this really should be called each update_frame, but for simplicity lets do it here)
         aircraft->discharge_battery();
 
         // Record statistics
         stats_collector_.record_flight(aircraft->get_type(),
-                                       frame_data.current_flight_time,
+                                       frame_data.current_flight_time_hrs,
                                        frame_data.current_flight_distance,
                                        aircraft->get_passenger_count());
 
@@ -307,7 +251,7 @@ namespace evtol
             log_event("Aircraft " + std::to_string(aircraft->get_id()) + " added to charging queue (no chargers available)");
             charger_mgr.add_to_queue(aircraft->get_id());
             frame_data.waiting_start_time = current_time_hours_;
-            frame_data.accumulated_waiting_time = 0.0;
+            frame_data.accumulated_waiting_time_sec = 0.0;
             frame_data.transition_to(AircraftState::WAITING_FOR_CHARGER);
         }
     }
@@ -319,10 +263,10 @@ namespace evtol
         auto &aircraft = fleet[aircraft_idx];
         auto &frame_data = aircraft_frame_data_[aircraft_idx];
 
-        double waiting_time_hours = frame_data.accumulated_waiting_time / 3600.0; // Convert to hours
-        log_event("Aircraft " + std::to_string(aircraft->get_id()) + " completed charging (" + 
-                 std::to_string(aircraft->get_charge_time_hours()) + "h charge, " + 
-                 std::to_string(waiting_time_hours) + "h wait)");
+        double waiting_time_hours = frame_data.accumulated_waiting_time_sec / 3600.0; // Convert to hours
+        log_event("Aircraft " + std::to_string(aircraft->get_id()) + " completed charging (" +
+                  std::to_string(aircraft->get_charge_time_hours()) + "h charge, " +
+                  std::to_string(waiting_time_hours) + "h wait)");
 
         // Charge battery
         aircraft->charge_battery();
@@ -350,10 +294,10 @@ namespace evtol
                     // Calculate waiting time for this aircraft
                     auto &next_frame_data = aircraft_frame_data_[i];
                     double waiting_time = (current_time_hours_ - next_frame_data.waiting_start_time) * 3600.0; // Convert to seconds
-                    next_frame_data.accumulated_waiting_time = waiting_time;
+                    next_frame_data.accumulated_waiting_time_sec = waiting_time;
 
-                    log_event("Aircraft " + std::to_string(next_aircraft_id) + " removed from queue and assigned charger (waited " + 
-                             std::to_string(waiting_time / 3600.0) + "h)");
+                    log_event("Aircraft " + std::to_string(next_aircraft_id) + " removed from queue and assigned charger (waited " +
+                              std::to_string(waiting_time / 3600.0) + "h)");
                     start_charging(charger_mgr, fleet, i);
                     break;
                 }
@@ -385,13 +329,13 @@ namespace evtol
         double flight_distance = aircraft->get_flight_distance_miles();
 
         // Set flight-specific data first
-        frame_data.current_flight_time = flight_time;
+        frame_data.current_flight_time_hrs = flight_time;
         frame_data.current_flight_distance = flight_distance;
         bool will_fault = aircraft->check_fault_during_flight(flight_time) > 0;
 
-        log_event("Starting flight for aircraft " + std::to_string(aircraft->get_id()) + 
-                 " (distance: " + std::to_string(flight_distance) + " miles, flight time: " + 
-                 std::to_string(flight_time) + "h)");
+        log_event("Starting flight for aircraft " + std::to_string(aircraft->get_id()) +
+                  " (distance: " + std::to_string(flight_distance) + " miles, flight time: " +
+                  std::to_string(flight_time) + "h)");
 
         if (will_fault)
         {
@@ -410,18 +354,18 @@ namespace evtol
         auto &aircraft = fleet[aircraft_idx];
         auto &frame_data = aircraft_frame_data_[aircraft_idx];
 
-        double charge_time = aircraft->get_charge_time_hours();
+        double charge_time_hrs = aircraft->get_charge_time_hours();
         frame_data.charger_id = charger_mgr.get_charger_id(aircraft->get_id());
 
-        double waiting_time_hours = frame_data.accumulated_waiting_time / 3600.0; // Convert to hours
-        log_event("Starting charging for aircraft " + std::to_string(aircraft->get_id()) + 
-                 " (charge time: " + std::to_string(charge_time) + "h, waited: " + 
-                 std::to_string(waiting_time_hours) + "h)");
+        double waiting_time_hours = frame_data.accumulated_waiting_time_sec / 3600.0; // Convert to hours
+        log_event("Starting charging for aircraft " + std::to_string(aircraft->get_id()) +
+                  " (charge time: " + std::to_string(charge_time_hrs) + "h, waited: " +
+                  std::to_string(waiting_time_hours) + "h)");
 
-        // If accumulated_waiting_time is 0, it means this aircraft got a charger immediately
+        // If accumulated_waiting_time_sec is 0, it means this aircraft got a charger immediately
         // and wasn't waiting
 
-        frame_data.reset_for_activity(AircraftState::CHARGING, charge_time * 3600.0); // Convert to seconds
+        frame_data.reset_for_activity(AircraftState::CHARGING, charge_time_hrs * 3600.0); // Convert to seconds
     }
 
     template <typename Fleet>
@@ -435,24 +379,23 @@ namespace evtol
         {
             auto &aircraft = fleet[i];
             auto &frame_data = aircraft_frame_data_[i];
-            
+
             switch (frame_data.get_state())
             {
-                case AircraftState::FLYING:
-                    handle_partial_flight(aircraft, frame_data);
-                    break;
-                    
-                case AircraftState::CHARGING:
-                    handle_partial_charging(aircraft, frame_data);
-                    break;
-                    
-                default:
-                    // No partial activity for other states
-                    break;
+            case AircraftState::FLYING:
+                handle_partial_flight(aircraft, frame_data);
+                break;
+
+            case AircraftState::CHARGING:
+                handle_partial_charging(aircraft, frame_data);
+                break;
+
+            default:
+                // No partial activity for other states
+                break;
             }
         }
     }
-
 
     template <typename Fleet>
     bool FrameBasedSimulationEngine::validate_simulation_state(Fleet &fleet) const
