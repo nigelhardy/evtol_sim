@@ -4,6 +4,7 @@
 CXX = clang++
 CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wshadow
 DEBUG_FLAGS = -g -O0 -DDEBUG -fsanitize=address -fsanitize=undefined
+RELEASE_FLAGS = -O3 -DNDEBUG -flto
 TEST_FLAGS = -g -O0 -DDEBUG
 
 # Project configuration
@@ -32,6 +33,7 @@ GTEST_FLAGS = $(GTEST_LIB) -lgtest -lgtest_main -pthread
 # Build directories
 BUILD_DIR = build
 DEBUG_DIR = $(BUILD_DIR)/debug
+RELEASE_DIR = $(BUILD_DIR)/release
 
 # Default target
 .PHONY: all
@@ -43,6 +45,13 @@ debug: $(DEBUG_DIR)/$(TARGET)
 
 $(DEBUG_DIR)/$(TARGET): $(SOURCES) $(HEADERS) | $(DEBUG_DIR)
 	$(CXX) $(CXXFLAGS) $(DEBUG_FLAGS) -o $@ $(SOURCES)
+
+# Release build (optimized)
+.PHONY: release
+release: $(RELEASE_DIR)/$(TARGET)
+
+$(RELEASE_DIR)/$(TARGET): $(SOURCES) $(HEADERS) | $(RELEASE_DIR)
+	$(CXX) $(CXXFLAGS) $(RELEASE_FLAGS) -o $@ $(SOURCES)
 
 # Test targets
 .PHONY: test
@@ -80,12 +89,19 @@ $(BUILD_DIR):
 $(DEBUG_DIR): | $(BUILD_DIR)
 	mkdir -p $(DEBUG_DIR)
 
+$(RELEASE_DIR): | $(BUILD_DIR)
+	mkdir -p $(RELEASE_DIR)
+
 $(TEST_BUILD_DIR): | $(BUILD_DIR)
 	mkdir -p $(TEST_BUILD_DIR)
 
 .PHONY: run-debug
 run-debug: debug
 	./$(DEBUG_DIR)/$(TARGET)
+
+.PHONY: run-release
+run-release: release
+	./$(RELEASE_DIR)/$(TARGET)
 
 # Clean targets
 .PHONY: clean
@@ -102,12 +118,14 @@ clean-all: clean
 help:
 	@echo "Available targets:"
 	@echo "  debug          - Build debug version with sanitizers"
+	@echo "  release        - Build optimized release version"
 	@echo "  test           - Build and run all tests"
 	@echo "  test-build     - Build test executable only"
 	@echo "  test-core      - Run core functionality tests (8 tests)"
 	@echo "  test-behavior  - Run system behavior tests (6 tests)"
 	@echo "  test-edge      - Run edge case tests (6 tests)"
 	@echo "  run-debug      - Run debug build"
+	@echo "  run-release    - Run release build"
 	@echo "  clean          - Remove build files"
 	@echo "  clean-all      - Remove all generated files"
 
