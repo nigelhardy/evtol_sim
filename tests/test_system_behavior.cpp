@@ -81,7 +81,7 @@ namespace evtol_test
         EXPECT_GT(summary.total_flights, fleet_size);
     }
 
-    // Test 4: Aircraft behavior consistency
+    // Test 4: Aircraft behavior consistency (needs non-deterministic mock class to be better)
     TEST_F(SystemBehaviorTest, AircraftBehaviorConsistency)
     {
         auto fleet = evtol::AircraftFactory<>::create_fleet(25);

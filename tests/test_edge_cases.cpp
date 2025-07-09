@@ -75,7 +75,8 @@ namespace evtol_test
         sim_engine.run_simulation(*charger_manager_, fleet);
 
         auto summary = stats_collector_->get_summary_stats();
-        // With very small duration, minimal activity expected
+        // With very small duration, minimal activity expected (but partial flights still)
+        // TODO we shoud make a version of this test where we disable partial flights, and expect 0
         EXPECT_GE(summary.total_flights, 0);
     }
 
@@ -99,7 +100,7 @@ namespace evtol_test
         EXPECT_GT(summary.total_charges, 0);
 
         // Queue should be managed effectively
-        EXPECT_LT(charger_manager_->get_queue_size(), 100); // Reasonable final state
+        EXPECT_LT(charger_manager_->get_queue_size(), 50); // Reasonable final state
     }
 
     // Test 6: Aircraft independence (each aircraft is separate object)
