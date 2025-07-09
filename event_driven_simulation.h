@@ -94,6 +94,13 @@ namespace evtol
             log_event("Fleet size: " + std::to_string(fleet.size()));
             log_event("Available chargers: " + std::to_string(charger_mgr.get_available_chargers()));
             
+            // Early termination for zero or negative duration
+            if (simulation_duration_hours_ <= 0.0)
+            {
+                log_event("Simulation duration is zero or negative - terminating early");
+                return;
+            }
+            
             schedule_initial_flights(fleet);
 
             // process events

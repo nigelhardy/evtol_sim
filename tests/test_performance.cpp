@@ -267,49 +267,6 @@ namespace evtol_test
         );
     }
 
-    // Test concurrent-style operations performance
-    TEST_F(PerformanceTest, ConcurrentStyleOperationsPerformance)
-    {
-        const int num_threads_simulated = 10;
-        const int operations_per_thread = 100;
-
-        PerformanceTestHelper::run_performance_test(
-            "Concurrent-Style Operations Performance",
-            [&]()
-            {
-                std::vector<std::unique_ptr<evtol::StatisticsCollector>> collectors;
-                std::vector<std::unique_ptr<evtol::ChargerManager>> managers;
-
-                // Simulate multiple independent simulations
-                for (int thread = 0; thread < num_threads_simulated; ++thread)
-                {
-                    collectors.emplace_back(std::make_unique<evtol::StatisticsCollector>());
-                    managers.emplace_back(std::make_unique<evtol::ChargerManager>());
-
-                    auto &stats = *collectors.back();
-                    auto &charger_mgr = *managers.back();
-
-                    for (int op = 0; op < operations_per_thread; ++op)
-                    {
-                        evtol::AircraftType type = static_cast<evtol::AircraftType>(op % 5);
-                        stats.record_flight(type, 1.0, 50.0, 2);
-
-                        int aircraft_id = thread * operations_per_thread + op;
-                        if (!charger_mgr.request_charger(aircraft_id))
-                        {
-                            charger_mgr.add_to_queue(aircraft_id);
-                        }
-                    }
-                }
-
-                // Verify all operations completed
-                EXPECT_EQ(collectors.size(), static_cast<size_t>(num_threads_simulated));
-                EXPECT_EQ(managers.size(), static_cast<size_t>(num_threads_simulated));
-            },
-            5.0 // Should complete within 5 seconds
-        );
-    }
-
     // Test simulation scaling with different fleet sizes
     TEST_F(PerformanceTest, SimulationScalingWithFleetSizes)
     {

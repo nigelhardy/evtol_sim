@@ -1,6 +1,5 @@
 #pragma once
 #include "aircraft.h"
-#include <random>
 
 namespace evtol
 {
@@ -123,10 +122,6 @@ namespace evtol
     template <typename... AircraftTypes>
     class AircraftFactory
     {
-    private:
-        static inline std::mt19937 rng{12345}; // Fixed seed for consistent comparison
-        static inline std::uniform_int_distribution<int> aircraft_dist{0, 4};
-
     public:
         static std::vector<std::unique_ptr<AircraftBase>> create_fleet(int size)
         {
@@ -135,7 +130,7 @@ namespace evtol
 
             for (int i = 0; i < size; ++i)
             {
-                int aircraft_type = aircraft_dist(rng);
+                int aircraft_type = i % 5; // Round-robin distribution
                 
                 switch (aircraft_type)
                 {
