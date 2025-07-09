@@ -2,7 +2,7 @@
 
 # Compiler configuration
 CXX = clang++
-CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wshadow
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Wconversion -Wshadow
 DEBUG_FLAGS = -g -O0 -DDEBUG -fsanitize=address -fsanitize=undefined
 TEST_FLAGS = -g -O0 -DDEBUG
 

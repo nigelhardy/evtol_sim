@@ -168,8 +168,8 @@ namespace evtol
         const double fault_probability_per_hour;
         // out of scope for this project, but leaving energy usage in class to be dynamic (in theory)
 
-        constexpr AircraftSpec(const std::string &mfg, double speed, double battery,
-                               double charge_time, int passengers, double fault_prob)
+        AircraftSpec(const std::string &mfg, double speed, double battery,
+                     double charge_time, int passengers, double fault_prob)
             : manufacturer(mfg), cruise_speed_mph(speed), battery_capacity_kwh(battery),
               time_to_charge_hours(charge_time), passenger_count(passengers),
               fault_probability_per_hour(fault_prob) {}

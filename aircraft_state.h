@@ -69,11 +69,10 @@ namespace evtol
     class AircraftStateMachine
     {
     private:
-        AircraftFrameData &frame_data_;
-
     public:
-        AircraftStateMachine(AircraftFrameData &frame_data)
-            : frame_data_(frame_data) {}
+        AircraftStateMachine()
+        {
+        }
 
         /**
          * Check if aircraft can transition to new state
